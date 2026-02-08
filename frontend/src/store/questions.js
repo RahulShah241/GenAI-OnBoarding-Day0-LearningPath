@@ -7,134 +7,143 @@ export const Chat_bot_questions = {
   //   },
   // ],
 
-  "Personal & Role Context": [
+  Role: [
     {
-      question: "How would you describe your current professional role and responsibilities?",
+      question: "Can you briefly describe your current role and the type of work you handle on a regular basis?",
       example:
-        "I currently work as a software developer, where I handle feature development, bug fixes, and collaborate with the team to deliver application updates.",
+        "I work as a software developer. My day-to-day responsibilities include developing new features, fixing bugs, reviewing code, and working with my team to deliver updates on time.",
     },
     {
-      question: "What type of work or role are you most interested in contributing to going forward?",
-      example: "I’m interested in roles that involve backend development, system design, and working with scalable architectures.",
+      question: "What kind of role or responsibilities would you like to work on in the future?",
+      example:
+        "I would like to work in a backend-focused role where I can design APIs, work with databases, and contribute to scalable system architecture.",
     },
   ],
 
-  "Skill Set Overview": [
+  Skills: [
     {
-      question: "Please summarize your overall skill set in your own words.",
-      example: "I have experience in backend development using Python and Java, REST APIs, databases, and basic frontend technologies.",
+      question: "How would you describe your current technical and functional skills in your own words?",
+      example:
+        "I have good experience in backend development using Python and Java. I am comfortable building REST APIs, working with relational databases, and have basic knowledge of frontend technologies like HTML and CSS.",
     },
     {
-      question: "What technical or functional skills do you use most often in your work?",
-      example: "I frequently use Python, FastAPI, SQL, Git, and debugging tools in my daily work.",
+      question: "Which skills or technologies do you use most frequently in your daily work?",
+      example: "In my daily work, I mostly use Python, FastAPI, SQL, Git for version control, and debugging tools to identify and fix issues.",
     },
     {
-      question: "Are there any tools, technologies, or methodologies you feel comfortable working with?",
-      example: "I’m comfortable with Agile methodology, Git-based workflows, REST APIs, and cloud basics.",
-    },
-  ],
-
-  "Experience & Exposure": [
-    {
-      question: "How would you describe your overall professional experience so far?",
-      example: "I have worked on a mix of internal tools and client-facing applications, gaining hands-on experience in development and deployment.",
-    },
-    {
-      question: "What kinds of projects or tasks have you been involved in previously?",
-      example: "I’ve worked on CRUD applications, authentication modules, dashboards, and automation scripts.",
-    },
-    {
-      question: "What areas of work have you had the most hands-on exposure to?",
-      example: "Backend development and API integrations have been my primary areas of hands-on work.",
+      question: "Are there any tools, technologies, or working methodologies that you feel confident using?",
+      example:
+        "I am comfortable working with Agile processes, Git-based workflows, REST API development, and have basic exposure to cloud platforms.",
     },
   ],
 
-  "Communication & Collaboration": [
+  Experience: [
     {
-      question: "How would you describe your communication style in a professional environment?",
-      example: "I try to communicate clearly and proactively, especially when discussing requirements or blockers.",
+      question: "How would you summarize your overall professional experience so far?",
+      example:
+        "So far, I have worked on both internal tools and client-facing applications, which helped me understand the full development lifecycle from requirement gathering to deployment.",
     },
     {
-      question: "What has been your experience working within a team?",
-      example: "I’ve worked in small teams where collaboration and regular sync-ups were essential to meet deadlines.",
+      question: "What types of projects or tasks have you worked on in the past?",
+      example: "I have worked on CRUD-based applications, authentication and authorization modules, admin dashboards, and small automation scripts.",
     },
     {
-      question: "How do you usually collaborate with peers or cross-functional teams?",
-      example: "I collaborate through meetings, documentation, and tools like Jira or Slack to stay aligned.",
-    },
-  ],
-
-  "Deliverables & Ownership": [
-    {
-      question: "How do you typically approach completing assigned deliverables?",
-      example: "I break tasks into smaller steps, clarify requirements early, and track progress until completion.",
-    },
-    {
-      question: "What kind of responsibilities do you usually take ownership of?",
-      example: "I usually take ownership of feature implementation, testing, and ensuring smooth handover.",
-    },
-    {
-      question: "How do you ensure quality and timely completion of your work?",
-      example: "I follow best practices, test my work, and communicate early if timelines need adjustment.",
+      question: "Which areas of work have you spent the most time working on hands-on?",
+      example: "Most of my hands-on experience has been in backend development, API integrations, and database-related tasks.",
     },
   ],
 
-  "Stakeholder Engagement & Coordination": [
+  Communication: [
     {
-      question: "What has been your experience interacting with stakeholders, clients, or internal teams?",
-      example: "I’ve interacted mainly with internal stakeholders to gather requirements and provide progress updates.",
+      question: "How would you describe the way you communicate with others in a professional setting?",
+      example:
+        "I communicate in a clear and respectful manner. I make sure to ask questions when requirements are unclear and provide timely updates on my progress.",
     },
     {
-      question: "How do you usually manage coordination when multiple people or teams are involved?",
-      example: "I rely on clear communication, shared documentation, and regular check-ins.",
+      question: "What has been your experience working as part of a team?",
+      example:
+        "I have worked in small to medium-sized teams where collaboration, regular discussions, and peer support were important to complete work successfully.",
     },
     {
-      question: "What helps you maintain clarity and alignment during collaboration?",
-      example: "Clear requirements, meeting notes, and confirmation of next steps help maintain alignment.",
-    },
-  ],
-
-  "Problem Solving & Decision Making": [
-    {
-      question: "How do you generally approach problem-solving in your work?",
-      example: "I first understand the problem, analyze possible solutions, and then implement and test the best option.",
-    },
-    {
-      question: "How do you handle new or unfamiliar challenges?",
-      example: "I research, ask questions when needed, and experiment in a controlled way to learn.",
+      question: "How do you usually collaborate with teammates or cross-functional teams?",
+      example: "I collaborate through regular meetings, shared documentation, and tools like Jira and Slack to stay aligned with everyone.",
     },
   ],
 
-  "Learning & Growth": [
+  Ownership: [
     {
-      question: "How do you usually learn or adapt when working with new tools or technologies?",
-      example: "I learn through documentation, small practice projects, and guidance from teammates.",
+      question: "How do you usually plan and complete the tasks assigned to you?",
+      example:
+        "I start by understanding the requirement clearly, break the task into smaller steps, set timelines, and track progress until the task is completed.",
     },
     {
-      question: "What areas or skills are you currently interested in improving or exploring?",
-      example: "I’m interested in improving system design skills and learning more about AI-based applications.",
+      question: "What type of work or responsibilities do you normally take ownership of?",
+      example: "I usually take ownership of implementing features end-to-end, including development, basic testing, and proper handover to the team.",
+    },
+    {
+      question: "How do you make sure your work is delivered on time and with good quality?",
+      example: "I follow coding best practices, test my work thoroughly, and communicate early if I see any risks to timelines.",
     },
   ],
 
-  "Work Preferences & Readiness": [
+  Collaboration: [
+    {
+      question: "What experience do you have working with stakeholders, clients, or other internal teams?",
+      example: "I have mostly worked with internal stakeholders to understand requirements, clarify expectations, and share progress updates.",
+    },
+    {
+      question: "How do you manage work when multiple people or teams are involved?",
+      example: "I rely on clear communication, defined responsibilities, shared documents, and regular follow-ups to ensure everyone stays aligned.",
+    },
+    {
+      question: "What helps you stay aligned and avoid misunderstandings while working with others?",
+      example: "Having clear requirements, written documentation, meeting notes, and confirmation of next steps helps me stay aligned.",
+    },
+  ],
+
+  "Problem-Solving": [
+    {
+      question: "How do you usually approach solving problems in your work?",
+      example:
+        "I first understand the problem clearly, analyze possible solutions, discuss if needed, and then implement and test the best solution.",
+    },
+    {
+      question: "What do you do when you face a new or unfamiliar challenge?",
+      example:
+        "I research the topic, refer to documentation, ask for guidance when needed, and try small experiments to learn and solve the problem.",
+    },
+  ],
+
+  Learning: [
+    {
+      question: "How do you usually learn or adapt when you need to work with new tools or technologies?",
+      example: "I learn by reading documentation, watching tutorials, practicing with small tasks, and taking help from teammates when required.",
+    },
+    {
+      question: "Which skills or areas are you currently interested in improving or learning next?",
+      example: "I want to improve my system design skills and learn more about cloud-native and AI-driven applications.",
+    },
+  ],
+
+  Workstyle: [
     {
       question: "How would you describe your preferred way of working?",
-      example: "I prefer a structured approach with flexibility to explore solutions when needed.",
+      example: "I prefer working in a structured environment with clear goals, but I also like having flexibility to explore better solutions.",
     },
     {
-      question: "What type of tasks or responsibilities motivate you the most?",
-      example: "I’m motivated by tasks where I can solve real problems and see visible impact.",
+      question: "What kind of work or responsibilities motivate you the most?",
+      example: "I feel most motivated when I work on meaningful tasks that solve real problems and allow me to see the impact of my work.",
     },
   ],
 
-  "AI Validation & Feedback": [
+  Validation: [
     {
-      question: "Does the skill and experience summary generated by the AI reflect your profile accurately?",
-      example: "Yes, the summary reflects my experience well overall.",
+      question: "Does the profile summary generated by the AI accurately represent your skills and experience?",
+      example: "Yes, the summary reflects my experience accurately. Most of my skills and past work have been captured well.",
     },
     {
-      question: "Would you like to modify, add, or clarify any part of the generated profile?",
-      example: "I’d like to add more details about my backend project experience.",
+      question: "Would you like to update, add, or clarify anything in the generated profile?",
+      example: "I would like to add more details about the backend projects I have worked on and the technologies used.",
     },
   ],
 };

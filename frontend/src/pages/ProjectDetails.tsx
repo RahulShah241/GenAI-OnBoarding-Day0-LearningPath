@@ -1,100 +1,38 @@
-import { ProjectDescription } from "@/types/project";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-// src/types/project.ts
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { bankGenAIProject } from "../store/ProjectData";
 
-export interface ProjectDescription {
-  project_id: string;
-  project_name: string;
-  project_type: string;
-  business_unit: string;
-  domain: string;
+export default function ProjectDetails() {
+  const project = bankGenAIProject;
 
-  project_overview: {
-    objective: string;
-    problem_statement: string;
-    expected_outcomes: string[];
-  };
-
-  project_duration: {
-    start_date: string;
-    expected_end_date: string;
-    engagement_type: string;
-  };
-
-  required_roles: {
-    role_name: string;
-    role_level: string;
-    headcount: number;
-    deployment_priority: string;
-  }[];
-
-  required_skills: {
-    skill_name: string;
-    required_level: string;
-    mandatory: boolean;
-  }[];
-
-  responsibilities: string[];
-  non_functional_requirements: string[];
-
-  delivery_model: {
-    methodology: string;
-    sprint_length_weeks: number;
-    communication_mode: string;
-  };
-
-  stakeholders: {
-    stakeholder_role: string;
-    engagement_level: string;
-  }[];
-
-  deployment_readiness_criteria: {
-    minimum_skill_match_percentage: number;
-    required_certifications: string[];
-    simulation_score_threshold: number;
-  };
-
-  bench_optimization: {
-    allows_partial_allocation: boolean;
-    upskilling_during_project: boolean;
-  };
-
-  risk_factors: string[];
-
-  ai_matching_metadata: {
-    priority_weight: number;
-    critical_skills_weight: number;
-    availability_weight: number;
-  };
-
-  status: {
-    current_status: string;
-    deployment_stage: string;
-    created_by: string;
-    last_updated: string;
-  };
-}
-
-export default function ProjectDetails({ project }: { project: ProjectDescription }) {
   return (
-    <div className="space-y-6">
-
+    <Box p={4}>
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold">{project.project_name}</h2>
-        <p className="text-muted-foreground">
-          {project.domain} · {project.business_unit}
-        </p>
-      </div>
+      <Typography variant="h4" fontWeight="bold">
+        {project.project_name}
+      </Typography>
+      <Typography color="text.secondary" mb={2}>
+        {project.domain} · {project.business_unit} · {project.project_type}
+      </Typography>
+
+      <Divider sx={{ mb: 3 }} />
 
       {/* Overview */}
       <Section title="Project Overview">
-        <p><b>Objective:</b> {project.project_overview.objective}</p>
-        <p><b>Problem:</b> {project.project_overview.problem_statement}</p>
+        <Typography><b>Objective:</b> {project.project_overview.objective}</Typography>
+        <Typography mt={1}><b>Problem:</b> {project.project_overview.problem_statement}</Typography>
 
-        <ul className="list-disc ml-5 mt-2">
-          {project.project_overview.expected_outcomes.map((o:any) => (
+        <Typography mt={2} fontWeight="medium">Expected Outcomes</Typography>
+        <ul>
+          {project.project_overview.expected_outcomes.map((o) => (
             <li key={o}>{o}</li>
           ))}
         </ul>
@@ -103,45 +41,54 @@ export default function ProjectDetails({ project }: { project: ProjectDescriptio
       {/* Duration */}
       <Section title="Engagement Details">
         <Info label="Start Date" value={project.project_duration.start_date} />
-        <Info label="Expected End" value={project.project_duration.expected_end_date} />
+        <Info label="Expected End Date" value={project.project_duration.expected_end_date} />
         <Info label="Engagement Type" value={project.project_duration.engagement_type} />
       </Section>
 
-      {/* Required Roles */}
+      {/* Roles */}
       <Section title="Required Roles">
-        {project.required_roles.map((role:any, i:any) => (
-          <Card key={i}>
-            <CardContent className="p-4 space-y-1">
-              <h4 className="font-semibold">{role.role_name}</h4>
-              <p className="text-sm text-muted-foreground">
-                Level: {role.role_level} · Headcount: {role.headcount}
-              </p>
-              <Badge variant="destructive">
-                Priority: {role.deployment_priority}
-              </Badge>
-            </CardContent>
-          </Card>
-        ))}
+        <Grid container spacing={2}>
+          {project.required_roles.map((role) => (
+            <Grid item xs={12} md={4} key={role.role_name}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography fontWeight="bold">{role.role_name}</Typography>
+                  <Typography variant="body2">
+                    Level: {role.role_level}
+                  </Typography>
+                  <Typography variant="body2">
+                    Headcount: {role.headcount}
+                  </Typography>
+                  <Chip
+                    label={`Priority: ${role.deployment_priority}`}
+                    color="error"
+                    size="small"
+                    sx={{ mt: 1 }}
+                  />
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       </Section>
 
-      {/* Required Skills */}
+      {/* Skills */}
       <Section title="Required Skills">
-        <div className="flex flex-wrap gap-2">
-          {project.required_skills.map((skill:any) => (
-            <Badge
+        <Stack direction="row" spacing={1} flexWrap="wrap">
+          {project.required_skills.map((skill) => (
+            <Chip
               key={skill.skill_name}
-              variant={skill.mandatory ? "default" : "secondary"}
-            >
-              {skill.skill_name} ({skill.required_level})
-            </Badge>
+              label={`${skill.skill_name} (${skill.required_level})`}
+              color={skill.mandatory ? "primary" : "default"}
+            />
           ))}
-        </div>
+        </Stack>
       </Section>
 
       {/* Responsibilities */}
       <Section title="Responsibilities">
-        <ul className="list-disc ml-5">
-          {project.responsibilities.map((r:any) => (
+        <ul>
+          {project.responsibilities.map((r) => (
             <li key={r}>{r}</li>
           ))}
         </ul>
@@ -150,8 +97,14 @@ export default function ProjectDetails({ project }: { project: ProjectDescriptio
       {/* Delivery Model */}
       <Section title="Delivery Model">
         <Info label="Methodology" value={project.delivery_model.methodology} />
-        <Info label="Sprint Length" value={`${project.delivery_model.sprint_length_weeks} weeks`} />
-        <Info label="Communication" value={project.delivery_model.communication_mode} />
+        <Info
+          label="Sprint Length"
+          value={`${project.delivery_model.sprint_length_weeks} weeks`}
+        />
+        <Info
+          label="Communication"
+          value={project.delivery_model.communication_mode}
+        />
       </Section>
 
       {/* Deployment Readiness */}
@@ -161,39 +114,44 @@ export default function ProjectDetails({ project }: { project: ProjectDescriptio
           value={`${project.deployment_readiness_criteria.minimum_skill_match_percentage}%`}
         />
         <Info
-          label="Simulation Score"
-          value={`${project.deployment_readiness_criteria.simulation_score_threshold}`}
+          label="Simulation Threshold"
+          value={project.deployment_readiness_criteria.simulation_score_threshold}
         />
       </Section>
 
       {/* Status */}
       <Section title="Project Status">
-        <Badge>{project.status.current_status}</Badge>
-        <Badge variant="outline">{project.status.deployment_stage}</Badge>
-        <p className="text-xs text-muted-foreground mt-2">
+        <Chip label={project.status.current_status} color="success" />
+        <Chip
+          label={project.status.deployment_stage}
+          variant="outlined"
+          sx={{ ml: 1 }}
+        />
+        <Typography variant="caption" display="block" mt={1}>
           Last updated: {project.status.last_updated}
-        </p>
+        </Typography>
       </Section>
-    </div>
+    </Box>
   );
 }
 
-function Section({ title, children }: any) {
+/* ---------- Helpers ---------- */
+
+function Section({ title, children }) {
   return (
-    <Card>
-      <CardContent className="p-6 space-y-3">
-        <h3 className="font-semibold text-lg">{title}</h3>
-        {children}
-      </CardContent>
-    </Card>
+    <Box mb={4}>
+      <Typography variant="h6" mb={1}>
+        {title}
+      </Typography>
+      {children}
+    </Box>
   );
 }
 
-function Info({ label, value }: { label: string; value: string }) {
+function Info({ label, value }) {
   return (
-    <p className="text-sm">
-      <span className="text-muted-foreground">{label}: </span>
-      <span className="font-medium">{value}</span>
-    </p>
+    <Typography>
+      <b>{label}:</b> {value}
+    </Typography>
   );
 }

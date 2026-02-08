@@ -1,162 +1,73 @@
-# Role-Based Access Control (RBAC) UI
+# Welcome to your Lovable project
 
-A modern, responsive Role-Based Access Control system built with React Tailwind CSS, featuring granular permissions management, user administration, and role-based access controls.
+## Project info
 
-## 🌟 Features
+**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
 
-### User Management
+## How can I edit this code?
 
-- 👥 View and manage users in a lexically sorted table
-- ➕ Add new users with role assignment
-- ✏️ Edit user roles and status
-- 🗑️ Delete users (admin only)
-- 📊 User status tracking (Active/Inactive)
+There are several ways of editing your application.
 
-### Role Management
+**Use Lovable**
 
-- 👑 Pre-configured roles (Admin, Moderator, User)
-- 🔐 Role-based access control
-- 📝 Edit role permissions
-- 🎯 Granular permission management
+Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
 
-### Permissions System
+Changes made via Lovable will be committed automatically to this repo.
 
-- 🎚️ Granular permission controls
-- 📂 Category-based permission organization
-- 🔄 Dynamic permission inheritance
-- 🛡️ Secure access control
+**Use your preferred IDE**
 
-### Data Management
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-- 💾 Local storage persistence
-- 🔄 Automatic data caching
-- 📊 Efficient state management
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-## 🛠️ Technical Stack
+Follow these steps:
 
-- **Framework:** React 18 + Vite
-- **Styling:** Tailwind CSS
-- **Data Persistence:** localStorage
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-## 🚀 Getting Started
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
 
-### Prerequisites
+# Step 3: Install the necessary dependencies.
+npm i
 
-- Node.js (v14 or higher)
-- npm or yarn
-
-### Installation
-
-1. Clone the repository
-
-```bash
-git clone https://github.com/yourusername/rbac-ui.git
-```
-
-2. Install dependencies
-
-```bash
-cd rbac-ui
-npm install
-```
-
-3. Start the development server
-
-```bash
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-4. Build for production
+**Edit a file directly in GitHub**
 
-```bash
-npm run build
-```
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-## 🔐 Role Hierarchy & Permissions
+**Use GitHub Codespaces**
 
-### Admin
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-- Full system access
-- Manage users and roles
-- Delete users
-- Modify any role
-- Access all features
+## What technologies are used for this project?
 
-### Moderator
+This project is built with:
 
-- Create users (limited to User/Moderator roles)
-- View users
-- Edit basic user info
-- Cannot delete users
-- Cannot modify Admin roles
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-### User
+## How can I deploy this project?
 
-- View users only
-- No management capabilities
-- Basic access only
+Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
 
-## 🔒 Security Features
+## Can I connect a custom domain to my Lovable project?
 
-- Role-based access control
-- Permission-based feature access
-- Input validation
-- Secure state management
-- Protected routes
-- Error handling
+Yes, you can!
 
-## 💡 Key Features
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
-### Caching System
-
-The application implements a custom caching system using localStorage:
-
-- First-time data fetch from source
-- Subsequent fetches from cache
-- Automatic cache updates
-- Persistent data storage
-
-### User Management
-
-- Add, edit, and delete users
-- Assign and modify roles
-- Toggle user status
-- Sort users alphabetically
-- Drag-and-drop reordering (admin only)
-
-### Permission Management
-
-- Granular permission control
-- Role-based access
-- Feature-level restrictions
-- Dynamic permission updates
-
-## 🛠️ Development
-
-### Project Structure
-
-```
-rbac-ui/
-├── src/
-│   ├── components/
-│   │   ├── UsersTable.jsx
-│   │   ├── EditRoleModal.jsx
-│   │   └── AddUserModal.jsx
-│   ├── store/
-│   │   └── Data.js
-│   └── App.jsx
-├── public/
-└── package.json
-```
-
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📞 Contact
-
-Project Link: [https://github.com/kriti-raj/rbac-ui](https://github.com/kriti-raj/rbac-ui)
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
