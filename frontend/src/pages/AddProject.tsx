@@ -23,6 +23,10 @@ export default function AddProject() {
   const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState("");
 
+  const [projectType, setProjectType] = useState("");
+  const [engagementType, setEngagementType] = useState("");
+  const [status, setStatus] = useState("");
+
   const addSkill = () => {
     if (skillInput.trim() && !skills.includes(skillInput)) {
       setSkills([...skills, skillInput]);
@@ -33,201 +37,205 @@ export default function AddProject() {
   const removeSkill = (skill: string) =>
     setSkills(skills.filter((s) => s !== skill));
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert("Project Created (UI Demo)");
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  const formData = new FormData(e.currentTarget);
+
+  const payload = {
+    project_name: String(formData.get("projectName") || ""),
+    project_type: projectType.toLowerCase(), // 🔥 enum safe
+    business_unit: String(formData.get("businessUnit") || ""),
+    domain: String(formData.get("domain") || ""),
+
+    project_overview: {
+      objective: String(formData.get("objective") || ""),
+      problem_statement: String(formData.get("problemStatement") || ""),
+    },
+
+    project_duration: {
+      start_date: String(formData.get("startDate") || ""), // yyyy-mm-dd
+      expected_end_date: String(formData.get("endDate") || ""),
+      engagement_type: engagementType.toLowerCase(), // 🔥 enum safe
+    },
+
+    required_roles: [
+      {
+        role_name: "Full Stack Developer",
+        role_level: "mid", // 🔥 lowercase safer for enum
+        headcount: Number(2),
+        deployment_priority: "high", // 🔥 lowercase safer
+      },
+    ],
+
+    required_skills: skills.map((s) => ({
+      skill_name: s,
+      required_level: "intermediate", // 🔥 lowercase safer
+      mandatory: true,
+    })),
+
+    responsibilities: [
+      "Develop features",
+      "Collaborate with team",
+    ],
+
+    delivery_model: {
+      methodology: "agile", // 🔥 lowercase safer
+      sprint_length_weeks: Number(2),
+      communication_mode: "hybrid", // 🔥 lowercase safer
+    },
+
+    deployment_readiness_criteria: {
+      minimum_skill_match_percentage: Number(70),
+      simulation_score_threshold: Number(60),
+    },
+
+    status: {
+      current_status: status.toLowerCase(), // 🔥 enum safe
+      deployment_stage: "planning", // 🔥 lowercase
+      last_updated: new Date().toISOString(),
+    },
   };
+
+  console.log("Sending payload:", payload);
+
+  try {
+    const response = await fetch("http://localhost:8000/project", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json(); // ✅ read ONLY once
+
+  if (!response.ok) {
+    console.error("Backend validation error:", result);
+    alert(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  alert(`Project Created Successfully! ID: ${result.project_id}`);
+
+    // e.currentTarget.reset();
+    setSkills([]);
+    setProjectType("");
+    setEngagementType("");
+    setStatus("");
+  } catch (err) {
+    console.error("Server error:", err);
+    alert("Server error");
+  }
+};
+
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">
-          Create New Project
-        </h1>
+        <h1 className="text-3xl font-bold">Create New Project</h1>
         <p className="text-muted-foreground">
           Define project scope, skills and delivery details
         </p>
       </div>
 
-      <Card className="shadow-lg rounded-xl border-2 border-border">
+      <Card className="shadow-lg border-2">
         <CardContent className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* BASIC INFO */}
+
             <SectionHeader title="Basic Information" />
 
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="projectName">Project Name</Label>
-                <Input
-                  id="projectName"
-                  placeholder="GenAI Banking Platform"
-                  required
-                />
-              </div>
+            <Input name="projectName" placeholder="Project Name" required />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label>Project Type</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PROJECT_TYPES.map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {t}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="grid grid-cols-3 gap-4">
+              <Select onValueChange={setProjectType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Project Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PROJECT_TYPES.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-                <div>
-                  <Label htmlFor="businessUnit">Business Unit</Label>
-                  <Input id="businessUnit" placeholder="BFSI" />
-                </div>
+              <Input name="businessUnit" placeholder="Business Unit" />
 
-                <div>
-                  <Label htmlFor="domain">Domain</Label>
-                  <Input id="domain" placeholder="Banking / AI" />
-                </div>
-              </div>
+              <Input name="domain" placeholder="Domain" />
             </div>
 
-            {/* OVERVIEW */}
             <SectionHeader title="Project Overview" />
 
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="objective">Objective</Label>
-                <Textarea
-                  id="objective"
-                  rows={2}
-                  placeholder="Automate banking workflows using GenAI"
-                />
-              </div>
+            <Textarea name="objective" placeholder="Objective" />
+            <Textarea name="problemStatement" placeholder="Problem Statement" />
 
-              <div>
-                <Label htmlFor="problemStatement">Problem Statement</Label>
-                <Textarea
-                  id="problemStatement"
-                  rows={2}
-                  placeholder="Manual workflows, delayed insights"
-                />
-              </div>
-            </div>
-
-            {/* DURATION */}
             <SectionHeader title="Timeline & Engagement" />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input id="startDate" type="date" />
-              </div>
+            <div className="grid grid-cols-3 gap-4">
+              <Input name="startDate" type="date" />
+              <Input name="endDate" type="date" />
 
-              <div>
-                <Label htmlFor="endDate">Expected End Date</Label>
-                <Input id="endDate" type="date" />
-              </div>
-
-              <div>
-                <Label>Engagement Type</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select engagement" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ENGAGEMENT_TYPES.map((e) => (
-                      <SelectItem key={e} value={e}>
-                        {e}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select onValueChange={setEngagementType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Engagement Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ENGAGEMENT_TYPES.map((e) => (
+                    <SelectItem key={e} value={e}>
+                      {e}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* SKILLS */}
             <SectionHeader title="Required Skills" />
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-3">
-                <Label htmlFor="skillInput">Skill</Label>
-                <Input
-                  id="skillInput"
-                  placeholder="FastAPI, GenAI, React"
-                  value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && (e.preventDefault(), addSkill())
-                  }
-                />
-              </div>
-              <div className="flex items-end">
-                <Button
-                  type="button"
-                  onClick={addSkill}
-                  className="w-full h-10"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Skill
-                </Button>
-              </div>
+            <div className="flex gap-2">
+              <Input
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
+                placeholder="Enter skill"
+              />
+              <Button type="button" onClick={addSkill}>
+                <Plus className="w-4 h-4" />
+              </Button>
             </div>
 
             <div className="flex flex-wrap gap-2">
               {skills.map((s) => (
-                <Badge
-                  key={s}
-                  variant="secondary"
-                  className="px-3 py-1 text-sm flex items-center gap-1"
-                >
+                <Badge key={s}>
                   {s}
-                  <button
-                    type="button"
+                  <X
+                    className="w-3 h-3 ml-1 cursor-pointer"
                     onClick={() => removeSkill(s)}
-                    className="ml-1 hover:text-destructive"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
+                  />
                 </Badge>
               ))}
             </div>
 
-            {/* STATUS */}
             <SectionHeader title="Project Status" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Current Status</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STATUS_OPTIONS.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <Select onValueChange={setStatus}>
+              <SelectTrigger>
+                <SelectValue placeholder="Current Status" />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_OPTIONS.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Separator />
+
+            <div className="flex justify-end">
+              <Button type="submit">Create Project</Button>
             </div>
 
-            {/* ACTIONS */}
-            <Separator className="my-6" />
-
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline">
-                Cancel
-              </Button>
-              <Button type="submit" size="lg" className="px-8">
-                Create Project
-              </Button>
-            </div>
           </form>
         </CardContent>
       </Card>
@@ -235,11 +243,10 @@ export default function AddProject() {
   );
 }
 
-/* ---------- Section Header ---------- */
 function SectionHeader({ title }: { title: string }) {
   return (
-    <div className="pt-4">
-      <h2 className="text-lg font-semibold text-foreground mb-2">{title}</h2>
+    <div>
+      <h2 className="text-lg font-semibold mb-2">{title}</h2>
       <Separator />
     </div>
   );

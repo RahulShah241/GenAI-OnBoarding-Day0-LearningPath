@@ -6,6 +6,8 @@ export interface Employee {
   skills: string[];
   experience: number;
   status: "Bench" | "Allocated";
+  designation?: string;
+  department?: string;
 }
 
 export const EMPLOYEES: Employee[] = [
@@ -17,6 +19,8 @@ export const EMPLOYEES: Employee[] = [
     skills: ["React", "Node.js", "GenAI"],
     experience: 2,
     status: "Bench",
+    designation: "Full Stack Developer",
+    department: "Engineering",
   },
   {
     id: "E002",
@@ -26,5 +30,51 @@ export const EMPLOYEES: Employee[] = [
     skills: ["Java", "Spring Boot", "AWS"],
     experience: 4,
     status: "Allocated",
+    designation: "Backend Developer",
+    department: "Engineering",
+  },
+  {
+    id: "E003",
+    name: "Priya Nair",
+    email: "priya@company.com",
+    role: "EMPLOYEE",
+    skills: ["Python", "FastAPI", "GenAI / RAG", "SQL"],
+    experience: 3,
+    status: "Bench",
+    designation: "AI/ML Engineer",
+    department: "Data Science",
+  },
+  {
+    id: "E004",
+    name: "Vikram Joshi",
+    email: "vikram@company.com",
+    role: "EMPLOYEE",
+    skills: ["React", "AWS", "Docker", "Node.js"],
+    experience: 5,
+    status: "Bench",
+    designation: "DevOps Engineer",
+    department: "Infrastructure",
+  },
+  {
+    id: "E005",
+    name: "Sneha Patil",
+    email: "sneha@company.com",
+    role: "EMPLOYEE",
+    skills: ["Python", "SQL", "Power BI", "React"],
+    experience: 3,
+    status: "Bench",
+    designation: "Data Engineer",
+    department: "Analytics",
+  },
+  {
+    id: "E006",
+    name: "Arjun Mehta",
+    email: "arjun@company.com",
+    role: "EMPLOYEE",
+    skills: ["Java", "Spring Boot", "Stripe API", "AWS"],
+    experience: 6,
+    status: "Allocated",
+    designation: "Senior Backend Developer",
+    department: "Engineering",
   },
 ];

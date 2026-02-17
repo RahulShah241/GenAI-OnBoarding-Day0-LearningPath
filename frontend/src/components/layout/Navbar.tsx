@@ -8,7 +8,7 @@ const Navbar = () => (
         <div className="w-10 h-10 rounded-xl border-2 border-primary/30 bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
           <Shield className="w-5 h-5" />
         </div>
-        <h1 className="text-lg font-semibold text-foreground tracking-tight">Dashboard</h1>
+        <h1 className="text-lg font-semibold text-foreground tracking-tight">RBAC Dashboard</h1>
       </div>
       <LogoutButton />
     </div>

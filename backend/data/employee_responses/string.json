@@ -1,0 +1,82 @@
+{
+  "employee_email": "string",
+  "role": "string",
+  "responses": [
+    {
+      "topic": "string",
+      "question": "string",
+      "answer": "string",
+      "score": {
+        "final_score": 0.1,
+        "nlp": {
+          "word_count": 1,
+          "keyword_hits": 0,
+          "nlp_score": 0.2
+        },
+        "llm": {
+          "relevance": 0,
+          "depth": 0,
+          "clarity": 0,
+          "feedback": "LLM evaluation failed"
+        }
+      }
+    },
+    {
+      "topic": "string",
+      "question": "string",
+      "answer": "string",
+      "score": {
+        "final_score": 0.1,
+        "nlp": {
+          "word_count": 1,
+          "keyword_hits": 0,
+          "nlp_score": 0.2
+        },
+        "llm": {
+          "relevance": 0,
+          "depth": 0,
+          "clarity": 0,
+          "feedback": "LLM evaluation failed"
+        }
+      }
+    },
+    {
+      "topic": "string",
+      "question": "string",
+      "answer": "string",
+      "score": {
+        "final_score": 0.1,
+        "nlp": {
+          "word_count": 1,
+          "keyword_hits": 0,
+          "nlp_score": 0.2
+        },
+        "llm": {
+          "relevance": 0,
+          "depth": 0,
+          "clarity": 0,
+          "feedback": "LLM evaluation failed"
+        }
+      }
+    },
+    {
+      "topic": "string",
+      "question": "string",
+      "answer": "string",
+      "score": {
+        "final_score": 0.1,
+        "nlp": {
+          "word_count": 1,
+          "keyword_hits": 0,
+          "nlp_score": 0.2
+        },
+        "llm": {
+          "relevance": 0,
+          "depth": 0,
+          "clarity": 0,
+          "feedback": "short feedback"
+        }
+      }
+    }
+  ]
+}

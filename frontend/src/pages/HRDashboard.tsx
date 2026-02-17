@@ -1,4 +1,4 @@
-import { FolderPlus, FolderOpen, Users } from "lucide-react";
+import { FolderPlus, FolderOpen, Users, UserCheck } from "lucide-react";
 import { DashboardCard } from "@/components/DashboardCard";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +28,12 @@ const actions: ActionItem[] = [
     description: "Access employee directory and details",
     icon: Users,
     route: "/hr/employees",
+  },
+  {
+    title: "Suggested Employees",
+    description: "View skill-matched employee suggestions per project",
+    icon: UserCheck,
+    route: "/hr/project-suggestions",
   },
 ];
 

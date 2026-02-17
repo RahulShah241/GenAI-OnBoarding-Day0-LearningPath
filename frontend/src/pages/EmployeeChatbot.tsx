@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import { Bot, User, Circle, Send, RotateCcw } from "lucide-react";
+import { Bot, User, Circle, Send, RotateCcw, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Chat_bot_questions } from "@/store/questions";
+import { submitTopicToBackend } from "@/api/api";
+import { Data } from "@/store/Data";
 
 /* ================= TYPES ================= */
 interface Message {
@@ -24,9 +27,11 @@ const CHAT_TOPICS = Object.keys(Chat_bot_questions);
 /* ================= COMPONENT ================= */
 export default function EmployeeChatbot() {
   const [input, setInput] = useState("");
+  const navigate = useNavigate();
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
 
+    const user = Data((state) => state.user);
   const [answers, setAnswers] = useState<Record<string, Answer[]>>({});
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -75,9 +80,10 @@ export default function EmployeeChatbot() {
       example: firstQ.example,
     });
   };
+  useEffect(()=>{startTopic(Object.keys(Chat_bot_questions)[0])},[])
 
   /* ================= HANDLE SEND ================= */
-  const handleSend = () => {
+ const handleSend =  async () => {
     if (!input.trim()) return;
 
     const userInput = input.trim();
@@ -136,7 +142,27 @@ export default function EmployeeChatbot() {
       from: "bot",
       text: `✅ "${activeTopic}" completed.`,
     });
+    try {
+    await submitTopicToBackend({
+      employeeEmail: user.email,   // from auth context
+      role: user.role,             // EMPLOYEE
+      topic: activeTopic,
+      answers: [
+        ...(answers[activeTopic] || []),
+        { question: currentQ, answer: userInput },
+      ],
+    });
 
+    pushBotMessage({
+      from: "bot",
+      text: "💾 Responses saved successfully.",
+    });
+  } catch (err) {
+    pushBotMessage({
+      from: "bot",
+      text: "⚠️ Failed to save responses. They will retry later.",
+    });
+  }
     const nextTopic = getNextTopic(activeTopic);
 
     if (nextTopic) {
@@ -144,9 +170,11 @@ export default function EmployeeChatbot() {
     } else {
       pushBotMessage({
         from: "bot",
-        text: "🎉 All sections completed! Thank you for your responses.",
+        text: "🎉 All sections completed! Thank you for your responses. You can now view your matched projects.",
       });
       setActiveTopic(null);
+      // Navigate to job matches after a short delay
+      setTimeout(() => navigate("/employee/job-matches"), 1500);
     }
   };
 
@@ -201,16 +229,14 @@ export default function EmployeeChatbot() {
                   : "text-muted-foreground hover:bg-muted"
               )}
             >
-              {(answers[topic]?.length ?? 0) > 0 && (
-                <Circle
-                  className={cn(
-                    "h-2.5 w-2.5",
-                    isTopicComplete(topic)
-                      ? "fill-green-500 text-green-500"
-                      : "fill-primary text-primary"
-                  )}
-                />
-              )}
+              <Circle
+                className={cn(
+                  "h-2.5 w-2.5",
+                  isTopicComplete(topic)
+                    ? "fill-primary text-primary"
+                    : "fill-muted text-muted"
+                )}
+              />
               <span className="text-sm font-medium">{topic}</span>
             </button>
           ))}

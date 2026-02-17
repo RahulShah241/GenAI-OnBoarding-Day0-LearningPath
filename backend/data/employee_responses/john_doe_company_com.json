@@ -1,0 +1,25 @@
+{
+  "employee_email": "john.doe@company.com",
+  "role": "Backend Developer",
+  "responses": [
+    {
+      "topic": "Problem Solving",
+      "question": "How do you handle and resolve production issues?",
+      "answer": "When a production issue occurs, I first assess the impact and prioritize user-facing problems. I analyze application logs, monitoring dashboards, and recent deployments to identify the root cause. If needed, I reproduce the issue locally or in a staging environment. Once identified, I implement a fix, validate it with tests, and deploy it carefully. After resolution, I document the incident and add preventive measures such as monitoring alerts or automated tests to avoid similar issues in the future.",
+      "score": {
+        "final_score": 4.5,
+        "nlp": {
+          "word_count": 78,
+          "keyword_hits": 1,
+          "nlp_score": 5
+        },
+        "llm": {
+          "relevance": 4,
+          "depth": 3,
+          "clarity": 5,
+          "feedback": "Clear and concise explanation of the problem-solving process. Provides a step-by-step approach to resolving production issues, including assessment, analysis, reproduction, fix implementation, testing, and documentation. However, could benefit from providing more specific examples or details about the application or industry."
+        }
+      }
+    }
+  ]
+}

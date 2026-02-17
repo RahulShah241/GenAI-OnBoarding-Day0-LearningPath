@@ -1,0 +1,106 @@
+[
+    {
+        "employee_id": "EMP-001",
+        "name": "Rahul Shah",
+        "skills": [
+            "Python",
+            "FastAPI",
+            "React",
+            "SQL"
+        ],
+        "experience_years": 2,
+        "business_unit": "BFSI",
+        "current_role": "Backend Developer"
+    },
+    {
+        "employee_id": "EMP-002",
+        "name": "Amit Verma",
+        "skills": [
+            "Java",
+            "Spring Boot",
+            "AWS",
+            "Docker"
+        ],
+        "experience_years": 5,
+        "business_unit": "BFSI",
+        "current_role": "Senior Backend Developer"
+    },
+    {
+        "employee_id": "EMP-003",
+        "name": "Neha Kapoor",
+        "skills": [
+            "React",
+            "Node.js",
+            "Docker",
+            "AWS"
+        ],
+        "experience_years": 3,
+        "business_unit": "Retail",
+        "current_role": "Full Stack Developer"
+    },
+    {
+        "employee_id": "EMP-004",
+        "name": "Karan Mehta",
+        "skills": [
+            "Python",
+            "SQL",
+            "Power BI",
+            "ETL"
+        ],
+        "experience_years": 6,
+        "business_unit": "Healthcare",
+        "current_role": "Data Engineer"
+    },
+    {
+        "employee_id": "EMP-005",
+        "name": "Priya Nair",
+        "skills": [
+            "React",
+            "TypeScript",
+            "Tailwind",
+            "UI/UX"
+        ],
+        "experience_years": 2,
+        "business_unit": "Retail",
+        "current_role": "Frontend Developer"
+    },
+    {
+        "employee_id": "EMP-006",
+        "name": "Siddharth Rao",
+        "skills": [
+            "Python",
+            "GenAI / RAG",
+            "LangChain",
+            "FastAPI"
+        ],
+        "experience_years": 4,
+        "business_unit": "BFSI",
+        "current_role": "AI/ML Engineer"
+    },
+    {
+        "employee_id": "EMP-007",
+        "name": "Anjali Desai",
+        "skills": [
+            "AWS",
+            "Docker",
+            "CI/CD",
+            "Kubernetes"
+        ],
+        "experience_years": 5,
+        "business_unit": "Cloud",
+        "current_role": "DevOps Engineer"
+    },
+    {
+        "employee_id": "EMP-008",
+        "name": "Rohit Singh",
+        "skills": [
+            "Java",
+            "Spring Boot",
+            "Microservices",
+            "Stripe API"
+        ],
+        "experience_years": 4,
+        "business_unit": "BFSI",
+        "current_role": "Backend Developer"
+    }
+]

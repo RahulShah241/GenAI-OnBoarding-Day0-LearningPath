@@ -1,0 +1,616 @@
+{
+  "employee_email": "user1@example.com",
+  "role": "EMPLOYEE",
+  "responses": [
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "How would you describe your current technical and functional skills in your own words?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 18:42:34.445558"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "Which skills or technologies do you use most frequently in your daily work?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 18:42:34.452569"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "Are there any tools, technologies, or working methodologies that you feel confident using?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 18:42:34.470857"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Experience",
+      "question": "How would you summarize your overall professional experience so far?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 18:42:38.938347"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Experience",
+      "question": "What types of projects or tasks have you worked on in the past?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 18:42:38.960607"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Experience",
+      "question": "Which areas of work have you spent the most time working on hands-on?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 18:42:38.983474"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "How would you describe your current technical and functional skills in your own words?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:07:12.685723"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "Which skills or technologies do you use most frequently in your daily work?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:07:12.713199"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "Are there any tools, technologies, or working methodologies that you feel confident using?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:07:12.733241"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "How would you describe your current technical and functional skills in your own words?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:07:13.339583"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "Which skills or technologies do you use most frequently in your daily work?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:07:13.371341"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "Are there any tools, technologies, or working methodologies that you feel confident using?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:07:13.391673"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "Are there any tools, technologies, or working methodologies that you feel confident using?",
+      "answer": "s",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:07:13.409216"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Role",
+      "question": "Can you briefly describe your current role and the type of work you handle on a regular basis?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:10:55.278547"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Role",
+      "question": "What kind of role or responsibilities would you like to work on in the future?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:10:55.309625"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "How would you describe your current technical and functional skills in your own words?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:10:57.800737"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "Which skills or technologies do you use most frequently in your daily work?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:10:57.827881"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "Are there any tools, technologies, or working methodologies that you feel confident using?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:10:57.845584"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "How would you describe your current technical and functional skills in your own words?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:10:58.424657"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "Which skills or technologies do you use most frequently in your daily work?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:10:58.445227"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "Are there any tools, technologies, or working methodologies that you feel confident using?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:10:58.457036"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Skills",
+      "question": "Are there any tools, technologies, or working methodologies that you feel confident using?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:10:58.482001"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Experience",
+      "question": "How would you summarize your overall professional experience so far?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:00.595071"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Experience",
+      "question": "How would you summarize your overall professional experience so far?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:00.615728"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Experience",
+      "question": "What types of projects or tasks have you worked on in the past?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:00.632982"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Experience",
+      "question": "Which areas of work have you spent the most time working on hands-on?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:00.651208"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Experience",
+      "question": "How would you summarize your overall professional experience so far?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:01.051490"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Experience",
+      "question": "How would you summarize your overall professional experience so far?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:01.069095"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Experience",
+      "question": "What types of projects or tasks have you worked on in the past?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:01.087272"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Experience",
+      "question": "Which areas of work have you spent the most time working on hands-on?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:01.105527"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Experience",
+      "question": "Which areas of work have you spent the most time working on hands-on?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:01.122821"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Communication",
+      "question": "How would you describe the way you communicate with others in a professional setting?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:02.844210"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Communication",
+      "question": "How would you describe the way you communicate with others in a professional setting?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:02.867947"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Communication",
+      "question": "What has been your experience working as part of a team?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:02.892696"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Communication",
+      "question": "How do you usually collaborate with teammates or cross-functional teams?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:02.915894"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Ownership",
+      "question": "How do you usually plan and complete the tasks assigned to you?",
+      "answer": "yes'",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:05.426458"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Ownership",
+      "question": "What type of work or responsibilities do you normally take ownership of?",
+      "answer": "es",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:05.450085"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Ownership",
+      "question": "How do you make sure your work is delivered on time and with good quality?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:05.468189"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Ownership",
+      "question": "How do you usually plan and complete the tasks assigned to you?",
+      "answer": "yes'",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:05.969672"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Ownership",
+      "question": "What type of work or responsibilities do you normally take ownership of?",
+      "answer": "es",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:05.989164"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Ownership",
+      "question": "How do you make sure your work is delivered on time and with good quality?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:06.007405"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Ownership",
+      "question": "How do you make sure your work is delivered on time and with good quality?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:06.028961"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Collaboration",
+      "question": "What experience do you have working with stakeholders, clients, or other internal teams?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:07.716085"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Collaboration",
+      "question": "How do you manage work when multiple people or teams are involved?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:07.739441"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Collaboration",
+      "question": "What helps you stay aligned and avoid misunderstandings while working with others?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:07.757730"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Collaboration",
+      "question": "What experience do you have working with stakeholders, clients, or other internal teams?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:08.287731"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Collaboration",
+      "question": "How do you manage work when multiple people or teams are involved?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:08.310042"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Collaboration",
+      "question": "What helps you stay aligned and avoid misunderstandings while working with others?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:08.327222"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Collaboration",
+      "question": "What helps you stay aligned and avoid misunderstandings while working with others?",
+      "answer": "yse",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:08.345492"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Problem-Solving",
+      "question": "How do you usually approach solving problems in your work?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:09.782130"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Problem-Solving",
+      "question": "How do you usually approach solving problems in your work?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:09.805655"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Problem-Solving",
+      "question": "What do you do when you face a new or unfamiliar challenge?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:09.824478"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Learning",
+      "question": "How do you usually learn or adapt when you need to work with new tools or technologies?",
+      "answer": "uyse",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:11.205801"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Learning",
+      "question": "Which skills or areas are you currently interested in improving or learning next?",
+      "answer": "yse",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:11.229473"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Learning",
+      "question": "How do you usually learn or adapt when you need to work with new tools or technologies?",
+      "answer": "uyse",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:11.776394"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Learning",
+      "question": "Which skills or areas are you currently interested in improving or learning next?",
+      "answer": "yse",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:11.798303"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Learning",
+      "question": "Which skills or areas are you currently interested in improving or learning next?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:11.818127"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Workstyle",
+      "question": "How would you describe your preferred way of working?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:12.959054"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Workstyle",
+      "question": "What kind of work or responsibilities motivate you the most?",
+      "answer": "yes",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:12.980564"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Validation",
+      "question": "Does the profile summary generated by the AI accurately represent your skills and experience?",
+      "answer": "yse",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:14.387115"
+    },
+    {
+      "employee_email": "user1@example.com",
+      "role": "EMPLOYEE",
+      "topic": "Validation",
+      "question": "Would you like to update, add, or clarify anything in the generated profile?",
+      "answer": "yesy",
+      "score": null,
+      "feedback": null,
+      "timestamp": "2026-02-09 19:11:14.411610"
+    }
+  ]
+}

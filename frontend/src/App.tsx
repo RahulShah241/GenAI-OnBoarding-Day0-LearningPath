@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import ProtectedRoute from "@/auth/ProtectedRoute";
 import Navbar from "@/components/layout/Navbar";
+import { AppBreadcrumb } from "@/components/AppBreadcrumb";
 
 /* Pages */
 import Login from "@/pages/Login";
@@ -17,6 +18,8 @@ import ProjectsList from "@/pages/ProjectsList";
 import AddProject from "@/pages/AddProject";
 import EmployeeList from "@/pages/EmployeesList";
 import EmployeeDetails from "@/pages/EmployeesDetails";
+import EmployeeJobMatches from "@/pages/EmployeeJobMatches";
+import HRProjectSuggestions from "@/pages/HRProjectSuggestions";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +28,7 @@ const queryClient = new QueryClient();
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
   <>
     <Navbar />
+    <AppBreadcrumb />
     <main className="min-h-[calc(100vh-64px)]">{children}</main>
   </>
 );
@@ -107,7 +111,7 @@ const App = () => (
             }
           />
           <Route
-            path="/projects/:id"
+            path="/hr/projects/:id"
             element={
               <ProtectedRoute roles={["HR"]}>
                 <AppLayout>
@@ -116,6 +120,17 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          <Route
+  path="/hr/projects/:projectId/suggested-employees"
+  element={
+    <ProtectedRoute roles={["HR"]}>
+      <AppLayout>
+        <HRProjectSuggestions />
+      </AppLayout>
+    </ProtectedRoute>
+  }
+/>
+
 
           {/* ================= EMPLOYEE ================= */}
           <Route
@@ -124,6 +139,16 @@ const App = () => (
               <ProtectedRoute roles={["EMPLOYEE"]}>
                 <AppLayout>
                   <EmployeeChatbot />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/job-matches"
+            element={
+              <ProtectedRoute roles={["EMPLOYEE"]}>
+                <AppLayout>
+                  <EmployeeJobMatches />
                 </AppLayout>
               </ProtectedRoute>
             }

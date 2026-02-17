@@ -49,3 +49,14 @@ export interface ProjectDescription {
     last_updated: string;
   };
 }
+
+
+export interface ProjectSummary{
+    project_id: string;
+    project_name: string;
+    domain: string;
+    business_unit: string;
+    project_type: string;
+    current_status: string;
+    deployment_stage: string;
+  }

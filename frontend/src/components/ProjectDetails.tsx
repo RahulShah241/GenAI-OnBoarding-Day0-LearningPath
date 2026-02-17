@@ -2,23 +2,53 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ProjectDescription } from "@/types/Project";
+import { Skeleton } from "./ui/skeleton";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useProjectById } from "@/api/hooks";
+import { Button } from "./ui/button";
 
 interface ProjectDetailsProps {
   project: ProjectDescription;
 }
 
-export default function ProjectDetails({ project }: ProjectDetailsProps) {
+export default function ProjectDetails() {
+  const navigate = useNavigate();
+
+   const { id } = useParams();
+  const { data:project, isLoading, isError } = useProjectById(id!);
+console.log(project)
+  if (isLoading) {
+    return <Skeleton className="h-40 m-8 rounded-xl" />;
+  }
+
+  if (isError || !project) {
+    return <div className="p-8 text-red-500">Failed to load project</div>;
+  }
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-2">
       {/* Header */}
       <h1 className="text-3xl font-bold text-foreground">
         {project.project_name}
       </h1>
-      <p className="text-muted-foreground mb-4">
-        {project.domain} · {project.business_unit} · {project.project_type}
-      </p>
+      <div className="flex items-center justify-between mb-4">
+  <p className="text-muted-foreground">
+    {project.domain} · {project.business_unit} · {project.project_type}
+  </p>
+
+  <Button
+    onClick={() =>
+      navigate(`/hr/projects/${project.project_id}/suggested-employees`)
+    }
+  >
+    View Suggested Employees
+  </Button>
+</div>
+
 
       <Separator className="mb-6" />
+      <div className="flex justify-end mb-4">
+  
+</div>
 
       {/* Overview */}
       <Section title="Project Overview">

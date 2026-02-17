@@ -4,21 +4,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useEmployees } from "@/api/hooks";
 import { EMPLOYEES } from "@/types/Employee";
 
 export default function EmployeeList() {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const { data: apiEmployees, isLoading } = useEmployees();
 
-  const filtered = EMPLOYEES.filter(
+  const employees = apiEmployees ?? EMPLOYEES;
+
+  const filtered = employees.filter(
     (e) =>
       e.name.toLowerCase().includes(query.toLowerCase()) ||
       e.skills.some((s) => s.toLowerCase().includes(query.toLowerCase()))
@@ -38,62 +38,55 @@ export default function EmployeeList() {
             onChange={(e) => setQuery(e.target.value)}
           />
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Skills</TableHead>
-                <TableHead>Experience</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((e) => (
-                <TableRow key={e.id}>
-                  <TableCell className="font-medium">{e.name}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {e.skills.map((s) => (
-                        <Badge key={s} variant="secondary">
-                          {s}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>{e.experience} yrs</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        e.status === "Allocated" ? "default" : "secondary"
-                      }
-                    >
-                      {e.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/hr/employees/${e.id}`)}
-                    >
-                      View
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filtered.length === 0 && (
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12 rounded" />)}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-center text-muted-foreground py-8"
-                  >
-                    No employees found
-                  </TableCell>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Skills</TableHead>
+                  <TableHead>Experience</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((e) => (
+                  <TableRow key={e.id}>
+                    <TableCell className="font-medium">{e.name}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {e.skills.map((s) => (
+                          <Badge key={s} variant="secondary">{s}</Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>{e.experience} yrs</TableCell>
+                    <TableCell>
+                      <Badge variant={e.status === "Allocated" ? "default" : "secondary"}>
+                        {e.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" onClick={() => navigate(`/hr/employees/${e.id}`)}>
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filtered.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                      No employees found
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

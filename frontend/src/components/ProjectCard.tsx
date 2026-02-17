@@ -1,9 +1,9 @@
-import { ProjectDescription } from "@/types/Project";
+import { ProjectDescription, ProjectSummary } from "@/types/Project";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 interface Props {
-  project: ProjectDescription;
+  project: ProjectSummary;
   onClick: () => void;
 }
 
@@ -20,7 +20,7 @@ export function ProjectCard({ project, onClick }: Props) {
         <p className="text-sm text-muted-foreground mt-1">{project.domain}</p>
 
         <Badge variant="secondary" className="mt-3">
-          {project.status.current_status}
+          {project.current_status}
         </Badge>
       </CardContent>
     </Card>

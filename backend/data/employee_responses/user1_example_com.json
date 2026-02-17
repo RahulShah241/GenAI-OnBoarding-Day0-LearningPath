@@ -1,0 +1,120 @@
+{
+  "employee_email": "user1@example.com",
+  "role": "EMPLOYEE",
+  "responses": [
+    {
+      "topic": "Role",
+      "question": "Can you briefly describe your current role and the type of work you handle on a regular basis?",
+      "answer": "oiansdsdaok iwenajk ds weqesda",
+      "score": {
+        "final_score": 0.4,
+        "nlp": {
+          "word_count": 4,
+          "keyword_hits": 0,
+          "nlp_score": 0.8
+        },
+        "llm": {
+          "relevance": 0,
+          "depth": 0,
+          "clarity": 0,
+          "feedback": "LLM evaluation failed"
+        }
+      }
+    },
+    {
+      "topic": "Role",
+      "question": "Can you briefly describe your current role and the type of work you handle on a regular basis?",
+      "answer": "oiansdsdaok iwenajk ds weqesda",
+      "score": {
+        "final_score": 1.4,
+        "nlp": {
+          "word_count": 4,
+          "keyword_hits": 0,
+          "nlp_score": 0.8
+        },
+        "llm": {
+          "relevance": 2,
+          "depth": 1,
+          "clarity": 3,
+          "feedback": "The response lacks relevance and coherence. A clearer and more concise answer would be appreciated."
+        }
+      }
+    },
+    {
+      "topic": "Role",
+      "question": "What kind of role or responsibilities would you like to work on in the future?",
+      "answer": "a dadwqee sad",
+      "score": {
+        "final_score": 1.8,
+        "nlp": {
+          "word_count": 3,
+          "keyword_hits": 0,
+          "nlp_score": 0.6
+        },
+        "llm": {
+          "relevance": 2,
+          "depth": 4,
+          "clarity": 3,
+          "feedback": "Could provide more context or details about the role you are interested in working on."
+        }
+      }
+    },
+    {
+      "topic": "Role",
+      "question": "What kind of role or responsibilities would you like to work on in the future?",
+      "answer": "asd",
+      "score": {
+        "final_score": 1.6,
+        "nlp": {
+          "word_count": 1,
+          "keyword_hits": 0,
+          "nlp_score": 0.2
+        },
+        "llm": {
+          "relevance": 2,
+          "depth": 3,
+          "clarity": 4,
+          "feedback": "Could provide more specific examples of desired roles or responsibilities in the future."
+        }
+      }
+    },
+    {
+      "topic": "Role",
+      "question": "Can you briefly describe your current role and the type of work you handle on a regular basis?",
+      "answer": "asd",
+      "score": {
+        "final_score": 1.27,
+        "nlp": {
+          "word_count": 1,
+          "keyword_hits": 0,
+          "nlp_score": 0.2
+        },
+        "llm": {
+          "relevance": 2,
+          "depth": 1,
+          "clarity": 4,
+          "feedback": "Could provide more details about the role and work handled."
+        }
+      }
+    },
+    {
+      "topic": "Role",
+      "question": "What kind of role or responsibilities would you like to work on in the future?",
+      "answer": "qwe123",
+      "score": {
+        "final_score": 1.93,
+        "nlp": {
+          "word_count": 1,
+          "keyword_hits": 0,
+          "nlp_score": 0.2
+        },
+        "llm": {
+          "relevance": 4,
+          "depth": 4,
+          "clarity": 3,
+          "feedback": "The response is too short. Could you please provide more details about the role or responsibilities you would like to work on in the future?"
+        }
+      }
+    }
+  ]
+}
