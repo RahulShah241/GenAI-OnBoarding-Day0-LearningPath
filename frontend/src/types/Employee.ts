@@ -82,4 +82,15 @@ export const EMPLOYEES: Employee[] = [
     designation: "Senior Backend Developer",
     department: "Engineering",
   },
+   {
+    employee_id: "E006",
+    name: "Arjun Mehta",
+    email: "user1@example.com",
+    role: "EMPLOYEE",
+    skills: ["Java", "Spring Boot", "Stripe API", "AWS"],
+    experience: 6,
+    status: "Allocated",
+    designation: "Senior Backend Developer",
+    department: "Engineering",
+  },
 ];

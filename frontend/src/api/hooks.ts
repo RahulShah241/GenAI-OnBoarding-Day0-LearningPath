@@ -21,7 +21,7 @@ export function useProjectById(id: string) {
   });
 }
 async function fetchProjectsFull(): Promise<ProjectDescription[]> {
-  const res = await fetch(`${API_BASE}/projects`);
+  const res = await fetch(`${API_BASE}/projectsDescrition`);
   if (!res.ok) throw new Error("Failed to fetch project details");
   return res.json();
 }

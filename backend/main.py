@@ -117,6 +117,13 @@ def get_projects():
         for p in projects
     ]
 
+@app.get("/projectsDescrition")
+def get_projectsDescription():
+    projects = read_json("projectDetails.json")
+    
+    return projects
+
+    # raise HTTPException(status_code=404, detail="Project not found")
 
 
 # -------------------------------

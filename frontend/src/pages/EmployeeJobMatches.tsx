@@ -109,7 +109,7 @@ export default function EmployeeJobMatches() {
     EMPLOYEES.find((e) => e.email === user?.email);
 
   const userSkills: string[] = currentEmployee?.skills ?? [];
-
+  console.log(userSkills)
   /* =============================
      Recommended Sorting
   ============================== */
