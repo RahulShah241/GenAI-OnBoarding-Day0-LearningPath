@@ -27,6 +27,10 @@ export default function AddProject() {
   const [engagementType, setEngagementType] = useState("");
   const [status, setStatus] = useState("");
 
+  const [expectedOutcomes, setExpectedOutcomes] = useState<string[]>([]);
+  const [responsibilities, setResponsibilities] = useState<string[]>([]);
+
+
   const addSkill = () => {
     if (skillInput.trim() && !skills.includes(skillInput)) {
       setSkills([...skills, skillInput]);
@@ -49,6 +53,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     domain: String(formData.get("domain") || ""),
 
     project_overview: {
+      expected_outcomes: expectedOutcomes,
       objective: String(formData.get("objective") || ""),
       problem_statement: String(formData.get("problemStatement") || ""),
     },
@@ -166,7 +171,13 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             </div>
 
             <SectionHeader title="Project Overview" />
-
+            
+            <ListInput
+              title="Expected Outcomes"
+              values={expectedOutcomes}
+              setValues={setExpectedOutcomes}
+              placeholder="Add expected outcome"
+            />
             <Textarea name="objective" placeholder="Objective" />
             <Textarea name="problemStatement" placeholder="Problem Statement" />
 
@@ -248,6 +259,59 @@ function SectionHeader({ title }: { title: string }) {
     <div>
       <h2 className="text-lg font-semibold mb-2">{title}</h2>
       <Separator />
+    </div>
+  );
+}
+function ListInput({
+  title,
+  values,
+  setValues,
+  placeholder,
+}: {
+  title: string;
+  values: string[];
+  setValues: React.Dispatch<React.SetStateAction<string[]>>;
+  placeholder: string;
+}) {
+  const [input, setInput] = useState("");
+
+  const addItem = () => {
+    if (input.trim() && !values.includes(input.trim())) {
+      setValues([...values, input.trim()]);
+      setInput("");
+    }
+  };
+
+  const removeItem = (item: string) => {
+    setValues(values.filter((v) => v !== item));
+  };
+
+  return (
+    <div>
+      <SectionHeader title={title} />
+
+      <div className="flex gap-2">
+        <Input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder={placeholder}
+        />
+        <Button type="button" onClick={addItem}>
+          <Plus className="w-4 h-4" />
+        </Button>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mt-3">
+        {values.map((item) => (
+          <Badge key={item}>
+            {item}
+            <X
+              className="w-3 h-3 ml-1 cursor-pointer"
+              onClick={() => removeItem(item)}
+            />
+          </Badge>
+        ))}
+      </div>
     </div>
   );
 }

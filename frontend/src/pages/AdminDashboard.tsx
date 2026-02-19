@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, UserPlus } from "lucide-react";
+import { useAdminEmployeeData,useAdminEmployeeDeleteByemail } from "@/api/hooks";
 
 const INITIAL_USERS = [
   { name: "Admin User", email: "admin@example.com", role: "ADMIN" },
@@ -20,9 +21,11 @@ const INITIAL_USERS = [
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState(INITIAL_USERS);
+  // const {data:  users,isLoading} =useAdminEmployeeData();
 
   const handleDelete = (email: string) => {
     setUsers(users.filter((u) => u.email !== email));
+    // useAdminEmployeeDeleteByemail(email)
   };
 
   const handleAdd = () => {
@@ -33,6 +36,7 @@ export default function AdminDashboard() {
     if (name && email && role) {
       setUsers([...users, { name, email, role }]);
     }
+    
   };
 
   const getRoleBadgeVariant = (role: string) => {

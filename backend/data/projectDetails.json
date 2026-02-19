@@ -1,1 +1,48 @@
-[]
+[
+    {
+        "project_id": "63eabffc-990c-4bb3-bda7-a0f98bfdbfd5",
+        "project_name": "Demo",
+        "project_type": "",
+        "business_unit": "demo",
+        "domain": "demo",
+        "project_overview": {
+            "expected_outcomes": [
+                "asd"
+            ],
+            "objective": "demo",
+            "problem_statement": "demo"
+        },
+        "project_duration": {
+            "start_date": "2026-02-17",
+            "expected_end_date": "2026-02-17",
+            "engagement_type": ""
+        },
+        "required_roles": [
+            {
+                "role_name": "Full Stack Developer",
+                "role_level": "mid",
+                "headcount": 2,
+                "deployment_priority": "high"
+            }
+        ],
+        "required_skills": [],
+        "responsibilities": [
+            "Develop features",
+            "Collaborate with team"
+        ],
+        "delivery_model": {
+            "methodology": "agile",
+            "sprint_length_weeks": 2,
+            "communication_mode": "hybrid"
+        },
+        "deployment_readiness_criteria": {
+            "minimum_skill_match_percentage": 70,
+            "simulation_score_threshold": 60
+        },
+        "status": {
+            "current_status": "",
+            "deployment_stage": "planning",
+            "last_updated": "2026-02-17T16:59:57.172000+00:00"
+        }
+    }
+]

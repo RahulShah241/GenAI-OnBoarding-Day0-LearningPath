@@ -143,7 +143,7 @@ def add_project(project: ProjectCreate):
         **project.dict()
     )
     print(new_project.dict())
-    append_json("projectDetails.json", jsonable_encoder(new_project.dict()))
+    append_json("data/projectDetails.json", jsonable_encoder(new_project.dict()))
     return {"message": "Project added successfully",'project_id':Id}
  
 # -------------------------------
@@ -164,6 +164,16 @@ def get_employee(employee_id: str):
 
     raise HTTPException(status_code=404, detail="Employee not found")
 
+@app.get("/employees/chatdata/{employee_id}")
+def get_employee(employee_id: str): 
+    BASE_DIR = Path(__file__).resolve().parent
+
+    file_path = BASE_DIR /"data"/ "employee_responses" / f"{employee_id}.json"
+    # print(file_path)
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    return read_json(file_path)
 @app.post("/employees")
 def add_employee(employee: dict):
     employees = read_json("employees.json")

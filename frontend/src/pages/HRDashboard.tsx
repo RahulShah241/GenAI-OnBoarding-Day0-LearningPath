@@ -29,12 +29,12 @@ const actions: ActionItem[] = [
     icon: Users,
     route: "/hr/employees",
   },
-  {
-    title: "Suggested Employees",
-    description: "View skill-matched employee suggestions per project",
-    icon: UserCheck,
-    route: "/hr/project-suggestions",
-  },
+  // {
+  //   title: "Suggested Employees",
+  //   description: "View skill-matched employee suggestions per project",
+  //   icon: UserCheck,
+  //   route: "/hr/project-suggestions",
+  // },
 ];
 
 export default function HRDashboard() {

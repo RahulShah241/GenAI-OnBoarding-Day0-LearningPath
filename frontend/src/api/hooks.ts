@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { ProjectDescription, ProjectSummary } from "@/types/Project";
-import type { Employee } from "@/types/Employee";
+import type { AdminEmployeeData, Employee } from "@/types/Employee";
+import type { EmployeeResponse } from "@/types/ChatData";
 
 const API_BASE = "http://localhost:8000";
 
@@ -79,6 +80,8 @@ export function useEmployees() {
 }
 
 // ===== Single Employee =====
+
+
 async function fetchEmployee(id: string): Promise<Employee> {
   const res = await fetch(`${API_BASE}/employees/${id}`);
   if (!res.ok) throw new Error("Failed to fetch employee");
@@ -95,6 +98,52 @@ export function useEmployee(id: string | undefined) {
   });
 }
 
+// ChatData by id
+async function fetchEmployeeChatData(id: string): Promise<EmployeeResponse> {
+  const res = await fetch(`${API_BASE}/employees/chatdata/${id}`);
+  if (!res.ok) throw new Error("Failed to fetch employee");
+  return res.json();
+}
+
+export function useEmployeeChatData(id: string | undefined) {
+  return useQuery<EmployeeResponse>({
+    queryKey: ["employee-chat", id],
+    queryFn: () => fetchEmployeeChatData(id!),
+    enabled: !!id,
+    retry: 1,
+    staleTime: 30_000,
+  });
+}
+// AdminEmployees
+async function fetchAdminEmployeeData(): Promise<AdminEmployeeData> {
+  const res = await fetch(`${API_BASE}/admin/employees`);
+  if (!res.ok) throw new Error("Failed to fetch employees");
+  return res.json();
+}
+export function useAdminEmployeeData(){
+  return useQuery<AdminEmployeeData>({
+    queryKey: ["adminEmployees"],
+    queryFn: fetchAdminEmployeeData,
+    retry: 1,
+    staleTime: 30_000,
+  });
+}
+
+// AdminEmployees
+async function deleteEmployee(id:string) {
+  const res = await fetch(`${API_BASE}/admin/delete/employee/${id}`);
+  if (!res.ok) throw new Error("Failed to fetch employees");
+  return res.json();
+}
+export function useAdminEmployeeDeleteByemail(email:string |undefined){
+  return useQuery({
+    queryKey: ["adminEmployeeDelete",email],
+    enabled:!!email,
+    queryFn:()=>   deleteEmployee(email!),
+    retry: 1,
+    staleTime: 30_000,
+  });
+}
 // ===== Suggested Employees (per project or all) =====
 export interface SuggestedEmployee extends Employee {
   match_percentage: number;

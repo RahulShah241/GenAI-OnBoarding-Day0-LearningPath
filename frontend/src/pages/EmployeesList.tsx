@@ -55,7 +55,7 @@ export default function EmployeeList() {
               </TableHeader>
               <TableBody>
                 {filtered.map((e) => (
-                  <TableRow key={e.id}>
+                  <TableRow key={e.employee_id}>
                     <TableCell className="font-medium">{e.name}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
@@ -71,7 +71,7 @@ export default function EmployeeList() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="outline" size="sm" onClick={() => navigate(`/hr/employees/${e.id}`)}>
+                      <Button variant="outline" size="sm" onClick={() => navigate(`/hr/employees/${e.employee_id}`)}>
                         View
                       </Button>
                     </TableCell>

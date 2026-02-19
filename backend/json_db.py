@@ -34,6 +34,37 @@ def append_json(filename, new_data):
 
     with open(filename, "w") as f:
         json.dump(data, f, indent=4)
+import json
+import os
+
+def append_json(file_path,new_data):
+   
+    
+    # If file doesn't exist, create with empty list
+    if not os.path.exists(file_path):
+        with open(file_path, "w") as f:
+            json.dump([], f)
+
+    # Read existing data
+    with open(file_path, "r") as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            data = []
+
+    # Ensure it's a list
+    if not isinstance(data, list):
+        raise ValueError("JSON file must contain a list")
+
+    # Append data
+    if isinstance(new_data, list):
+        data.extend(new_data)
+    else:
+        data.append(new_data)
+
+    # Write back updated data
+    with open(file_path, "w") as f:
+        json.dump(data, f, indent=4)
 
 
 # def append_json(filename: str, new_item):

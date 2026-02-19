@@ -7,6 +7,7 @@ import uuid
 # ---------- Nested Project Schemas ----------
 
 class ProjectOverview(BaseModel):
+    expected_outcomes:List[str]
     objective: str
     problem_statement: str
 
@@ -90,7 +91,7 @@ class ProjectSummary(BaseModel):
     domain: str
     business_unit: str
     project_type: str
-    current_status: str
+    current_status: Optional[str]='open'
     deployment_stage: str
 
 
@@ -98,10 +99,18 @@ class ProjectSummary(BaseModel):
 
 class Employee(BaseModel):
     employee_id: str
+    password:str
+    email:str
     name: str
     skills: List[str]
-    experience_years: int
-
+    experience: int
+    name: str
+    role: str
+    skills: List[str]
+    experience: float
+    status: str
+    designation: Optional[str]=None
+    department: Optional[str]=None
 
 class SuggestedEmployee(Employee):
     match_percentage: int
@@ -109,7 +118,61 @@ class SuggestedEmployee(Employee):
     missing_skills: List[str]
 
 
+
+
+from pydantic import BaseModel, Field, EmailStr
+from typing import List, Literal
+
+
+# ---------------------------
+# NLP Score Model
+# ---------------------------
+class NLPScore(BaseModel):
+    word_count: int
+    keyword_hits: int
+    nlp_score: float
+
+
+# ---------------------------
+# LLM Score Model
+# ---------------------------
+class LLMScore(BaseModel):
+    relevance: int
+    depth: int
+    clarity: int
+    feedback: str
+
+
+# ---------------------------
+# Overall Score Model
+# ---------------------------
+class Score(BaseModel):
+    final_score: float
+    nlp: NLPScore
+    llm: LLMScore
+
+
+# ---------------------------
+# Response Item Model
+# ---------------------------
+class ResponseItem(BaseModel):
+    topic: str
+    question: str
+    answer: str
+    score: Score
+
+
+# ---------------------------
+# Main Employee Response Schema
+# ---------------------------
+class EmployeeResponse(BaseModel):
+    employee_email: EmailStr
+    role: Literal["EMPLOYEE", "HR", "ADMIN"]
+    responses: List[ResponseItem] = Field(default_factory=list)
+    
+
 class TopicResponseCreate(BaseModel):
+    employee_id:str
     employee_email: str
     role: str
     topic: str

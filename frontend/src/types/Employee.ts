@@ -1,5 +1,5 @@
 export interface Employee {
-  id: string;
+  employee_id: string;
   name: string;
   email: string;
   role: "EMPLOYEE" | "HR" | "ADMIN";
@@ -9,10 +9,15 @@ export interface Employee {
   designation?: string;
   department?: string;
 }
-
+export interface AdminEmployeeData{
+  employee_id: string;
+  name: string;
+  email: string;
+  role: "EMPLOYEE" | "HR" | "ADMIN";
+}
 export const EMPLOYEES: Employee[] = [
   {
-    id: "E001",
+    employee_id: "E001",
     name: "Rahul Shah",
     email: "rahul@company.com",
     role: "EMPLOYEE",
@@ -23,7 +28,7 @@ export const EMPLOYEES: Employee[] = [
     department: "Engineering",
   },
   {
-    id: "E002",
+    employee_id: "E002",
     name: "Anita Verma",
     email: "anita@company.com",
     role: "EMPLOYEE",
@@ -34,7 +39,7 @@ export const EMPLOYEES: Employee[] = [
     department: "Engineering",
   },
   {
-    id: "E003",
+    employee_id: "E003",
     name: "Priya Nair",
     email: "priya@company.com",
     role: "EMPLOYEE",
@@ -45,7 +50,7 @@ export const EMPLOYEES: Employee[] = [
     department: "Data Science",
   },
   {
-    id: "E004",
+    employee_id: "E004",
     name: "Vikram Joshi",
     email: "vikram@company.com",
     role: "EMPLOYEE",
@@ -56,7 +61,7 @@ export const EMPLOYEES: Employee[] = [
     department: "Infrastructure",
   },
   {
-    id: "E005",
+    employee_id: "E005",
     name: "Sneha Patil",
     email: "sneha@company.com",
     role: "EMPLOYEE",
@@ -67,7 +72,7 @@ export const EMPLOYEES: Employee[] = [
     department: "Analytics",
   },
   {
-    id: "E006",
+    employee_id: "E006",
     name: "Arjun Mehta",
     email: "arjun@company.com",
     role: "EMPLOYEE",
