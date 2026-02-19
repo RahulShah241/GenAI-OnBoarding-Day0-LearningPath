@@ -1,21 +1,249 @@
 [
     {
-        "project_id": "63eabffc-990c-4bb3-bda7-a0f98bfdbfd5",
+        "project_id": "P001",
+        "project_name": "AI Talent Matching Platform",
+        "project_type": "Internal Innovation",
+        "business_unit": "Digital Transformation",
+        "domain": "AI / HR Tech",
+        "project_overview": {
+            "objective": "Build an AI-driven talent-to-project matching system.",
+            "problem_statement": "Manual resource allocation causes inefficiencies.",
+            "expected_outcomes": [
+                "Automated skill matching",
+                "Improved deployment speed",
+                "Higher utilization rate"
+            ]
+        },
+        "project_duration": {
+            "start_date": "2024-01-01",
+            "expected_end_date": "2024-06-30",
+            "engagement_type": "Full-Time"
+        },
+        "required_roles": [
+            {
+                "role_name": "Frontend Developer",
+                "role_level": "Mid",
+                "headcount": 2,
+                "deployment_priority": "High"
+            },
+            {
+                "role_name": "AI Engineer",
+                "role_level": "Senior",
+                "headcount": 1,
+                "deployment_priority": "High"
+            }
+        ],
+        "required_skills": [
+            {
+                "skill_name": "React",
+                "required_level": "Intermediate",
+                "mandatory": true
+            },
+            {
+                "skill_name": "Node.js",
+                "required_level": "Intermediate",
+                "mandatory": true
+            },
+            {
+                "skill_name": "Python",
+                "required_level": "Advanced",
+                "mandatory": true
+            },
+            {
+                "skill_name": "GenAI",
+                "required_level": "Advanced",
+                "mandatory": false
+            }
+        ],
+        "responsibilities": [
+            "Develop AI scoring models",
+            "Implement frontend dashboards",
+            "Integrate REST APIs"
+        ],
+        "delivery_model": {
+            "methodology": "Agile",
+            "sprint_length_weeks": 2,
+            "communication_mode": "Hybrid"
+        },
+        "deployment_readiness_criteria": {
+            "minimum_skill_match_percentage": 60,
+            "simulation_score_threshold": 70
+        },
+        "status": {
+            "current_status": "Open",
+            "deployment_stage": "Planning",
+            "last_updated": "2024-02-01"
+        }
+    },
+    {
+        "project_id": "P002",
+        "project_name": "Cloud Migration for E-Commerce",
+        "project_type": "Client Project",
+        "business_unit": "Enterprise Solutions",
+        "domain": "Cloud & DevOps",
+        "project_overview": {
+            "objective": "Migrate legacy systems to AWS cloud.",
+            "problem_statement": "On-prem infrastructure is costly and unscalable.",
+            "expected_outcomes": [
+                "Reduced infrastructure cost",
+                "Improved scalability",
+                "Zero downtime deployment"
+            ]
+        },
+        "project_duration": {
+            "start_date": "2024-03-01",
+            "expected_end_date": "2024-09-30",
+            "engagement_type": "Contract"
+        },
+        "required_roles": [
+            {
+                "role_name": "DevOps Engineer",
+                "role_level": "Senior",
+                "headcount": 2,
+                "deployment_priority": "High"
+            },
+            {
+                "role_name": "Backend Developer",
+                "role_level": "Mid",
+                "headcount": 1,
+                "deployment_priority": "Medium"
+            }
+        ],
+        "required_skills": [
+            {
+                "skill_name": "AWS",
+                "required_level": "Advanced",
+                "mandatory": true
+            },
+            {
+                "skill_name": "Docker",
+                "required_level": "Intermediate",
+                "mandatory": true
+            },
+            {
+                "skill_name": "Java",
+                "required_level": "Intermediate",
+                "mandatory": false
+            },
+            {
+                "skill_name": "Spring Boot",
+                "required_level": "Intermediate",
+                "mandatory": false
+            }
+        ],
+        "responsibilities": [
+            "Setup CI/CD pipelines",
+            "Containerize applications",
+            "Deploy scalable infrastructure"
+        ],
+        "delivery_model": {
+            "methodology": "Scrum",
+            "sprint_length_weeks": 2,
+            "communication_mode": "Remote"
+        },
+        "deployment_readiness_criteria": {
+            "minimum_skill_match_percentage": 70,
+            "simulation_score_threshold": 75
+        },
+        "status": {
+            "current_status": "Open",
+            "deployment_stage": "Execution",
+            "last_updated": "2024-02-10"
+        }
+    },
+    {
+        "project_id": "P003",
+        "project_name": "Data Analytics Dashboard",
+        "project_type": "Internal Tooling",
+        "business_unit": "Analytics",
+        "domain": "Data Engineering",
+        "project_overview": {
+            "objective": "Create BI dashboards for executive insights.",
+            "problem_statement": "Lack of centralized reporting.",
+            "expected_outcomes": [
+                "Real-time dashboards",
+                "Automated reporting",
+                "Improved decision making"
+            ]
+        },
+        "project_duration": {
+            "start_date": "2024-04-01",
+            "expected_end_date": "2024-08-01",
+            "engagement_type": "Full-Time"
+        },
+        "required_roles": [
+            {
+                "role_name": "Data Engineer",
+                "role_level": "Mid",
+                "headcount": 1,
+                "deployment_priority": "High"
+            },
+            {
+                "role_name": "Frontend Developer",
+                "role_level": "Junior",
+                "headcount": 1,
+                "deployment_priority": "Low"
+            }
+        ],
+        "required_skills": [
+            {
+                "skill_name": "Python",
+                "required_level": "Intermediate",
+                "mandatory": true
+            },
+            {
+                "skill_name": "SQL",
+                "required_level": "Advanced",
+                "mandatory": true
+            },
+            {
+                "skill_name": "Power BI",
+                "required_level": "Intermediate",
+                "mandatory": false
+            },
+            {
+                "skill_name": "React",
+                "required_level": "Basic",
+                "mandatory": false
+            }
+        ],
+        "responsibilities": [
+            "Build ETL pipelines",
+            "Design data models",
+            "Develop interactive dashboards"
+        ],
+        "delivery_model": {
+            "methodology": "Kanban",
+            "sprint_length_weeks": 1,
+            "communication_mode": "Hybrid"
+        },
+        "deployment_readiness_criteria": {
+            "minimum_skill_match_percentage": 50,
+            "simulation_score_threshold": 60
+        },
+        "status": {
+            "current_status": "Open",
+            "deployment_stage": "Planning",
+            "last_updated": "2024-02-12"
+        }
+    },
+    {
+        "project_id": "52672212-61fd-4573-bf02-b1653a643917",
         "project_name": "Demo",
-        "project_type": "",
+        "project_type": "client",
         "business_unit": "demo",
         "domain": "demo",
         "project_overview": {
             "expected_outcomes": [
-                "asd"
+                "demo"
             ],
             "objective": "demo",
             "problem_statement": "demo"
         },
         "project_duration": {
-            "start_date": "2026-02-17",
-            "expected_end_date": "2026-02-17",
-            "engagement_type": ""
+            "start_date": "2026-02-19",
+            "expected_end_date": "2026-02-19",
+            "engagement_type": "full-time"
         },
         "required_roles": [
             {
@@ -25,7 +253,18 @@
                 "deployment_priority": "high"
             }
         ],
-        "required_skills": [],
+        "required_skills": [
+            {
+                "skill_name": "React",
+                "required_level": "intermediate",
+                "mandatory": true
+            },
+            {
+                "skill_name": "Python",
+                "required_level": "intermediate",
+                "mandatory": true
+            }
+        ],
         "responsibilities": [
             "Develop features",
             "Collaborate with team"
@@ -40,9 +279,9 @@
             "simulation_score_threshold": 60
         },
         "status": {
-            "current_status": "",
+            "current_status": "open",
             "deployment_stage": "planning",
-            "last_updated": "2026-02-17T16:59:57.172000+00:00"
+            "last_updated": "2026-02-19T17:29:06.506000+00:00"
         }
     }
 ]

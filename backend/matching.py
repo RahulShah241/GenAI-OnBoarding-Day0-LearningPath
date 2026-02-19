@@ -14,10 +14,10 @@ def calculate_match(project: ProjectDescription, employee: Employee) -> Suggeste
 
     # Experience score
     required_exp = 3  # You can derive from role level later
-    if employee['experience_years'] >= required_exp:
+    if employee['experience'] >= required_exp:
         exp_score = 100
     else:
-        exp_score = (employee['experience_years'] / required_exp) * 100
+        exp_score = (employee['experience'] / required_exp) * 100
 
     final_score = int((0.7 * skill_score) + (0.3 * exp_score))
 

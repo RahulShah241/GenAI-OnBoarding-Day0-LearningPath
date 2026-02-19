@@ -99,7 +99,7 @@ class ProjectSummary(BaseModel):
 
 class Employee(BaseModel):
     employee_id: str
-    password:str
+    password:Optional[str]=None
     email:str
     name: str
     skills: List[str]

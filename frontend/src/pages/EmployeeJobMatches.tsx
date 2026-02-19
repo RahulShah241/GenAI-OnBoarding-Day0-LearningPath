@@ -103,7 +103,7 @@ export default function EmployeeJobMatches() {
 
   const { data: apiProjects = [], isLoading } = useProjectsFull();
   const projects: ProjectDescription[] = apiProjects ?? [];
-
+  console.log(projects)
   // 🔥 Use logged-in user from API first
   const currentEmployee =
     EMPLOYEES.find((e) => e.email === user?.email);
