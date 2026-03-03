@@ -12,7 +12,8 @@
         "experience": 2,
         "status": "Bench",
         "designation": "Full Stack Developer",
-        "department": "Engineering"
+        "department": "Engineering",
+        "password": "$2b$12$yyvuREXeWgRdSqPDOA/IdO4pANMXSZC5pGlokr54/jUVqocQsuyv."
     },
     {
         "employee_id": "E002",
@@ -27,7 +28,8 @@
         "experience": 4,
         "status": "Allocated",
         "designation": "Backend Developer",
-        "department": "Engineering"
+        "department": "Engineering",
+        "password": "e002123"
     },
     {
         "employee_id": "E003",
@@ -43,7 +45,8 @@
         "experience": 3,
         "status": "Bench",
         "designation": "AI/ML Engineer",
-        "department": "Data Science"
+        "department": "Data Science",
+        "password": "e003123"
     },
     {
         "employee_id": "E004",
@@ -59,7 +62,8 @@
         "experience": 5,
         "status": "Bench",
         "designation": "DevOps Engineer",
-        "department": "Infrastructure"
+        "department": "Infrastructure",
+        "password": "e004123"
     },
     {
         "employee_id": "E005",
@@ -75,7 +79,8 @@
         "experience": 3,
         "status": "Bench",
         "designation": "Data Engineer",
-        "department": "Analytics"
+        "department": "Analytics",
+        "password": "e005123"
     },
     {
         "employee_id": "E006",
@@ -91,6 +96,37 @@
         "experience": 6,
         "status": "Allocated",
         "designation": "Senior Backend Developer",
-        "department": "Engineering"
+        "department": "Engineering",
+        "password": "e006123"
+    },
+    {
+        "employee_id": "HR001",
+        "name": "HR Manager",
+        "email": "hr@company.com",
+        "role": "HR",
+        "skills": [
+            "Recruiting",
+            "HR Management"
+        ],
+        "experience": 5.0,
+        "status": "Active",
+        "designation": "HR Manager",
+        "department": "Human Resources",
+        "password": "$2b$12$dgZy8yWTZ3V2Lc7sgjtPYuUycW1YowY5420ms/y3GJsNcZ.8w1F0u"
+    },
+    {
+        "employee_id": "ADMIN001",
+        "name": "Admin User",
+        "email": "admin@company.com",
+        "role": "ADMIN",
+        "skills": [
+            "Administration",
+            "Management"
+        ],
+        "experience": 8.0,
+        "status": "Active",
+        "designation": "System Administrator",
+        "department": "IT",
+        "password": "admin123"
     }
 ]

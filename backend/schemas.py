@@ -1,18 +1,29 @@
-from pydantic import BaseModel
-from typing import List, Optional
+"""
+schemas.py
+──────────
+All Pydantic models for request validation and response serialisation.
+
+Original fields are fully preserved. Auth-related models are added at the
+bottom without touching any existing model.
+"""
+
+from __future__ import annotations
+
 from datetime import date, datetime
-import uuid
+from typing import List, Literal, Optional
+
+from pydantic import BaseModel, EmailStr, Field
 
 
-# ---------- Nested Project Schemas ----------
+# ══════════════════════════════════════════════════════════════════════════════
+# PROJECT — nested sub-schemas
+# ══════════════════════════════════════════════════════════════════════════════
 
 class ProjectOverview(BaseModel):
-    expected_outcomes:List[str]
     objective: str
     problem_statement: str
+    expected_outcomes: List[str]
 
-
-from datetime import date
 
 class ProjectDuration(BaseModel):
     start_date: date
@@ -50,10 +61,12 @@ class StatusModel(BaseModel):
     last_updated: datetime
 
 
-# ---------- Project Schemas ----------
+# ══════════════════════════════════════════════════════════════════════════════
+# PROJECT — top-level schemas
+# ══════════════════════════════════════════════════════════════════════════════
 
-# 🔥 Used when creating project (NO project_id required)
 class ProjectCreate(BaseModel):
+    """Payload when creating a new project (no project_id yet)."""
     project_name: str
     project_type: str
     business_unit: str
@@ -68,74 +81,75 @@ class ProjectCreate(BaseModel):
     status: StatusModel
 
 
-# 🔥 Used when returning project (project_id included)
-class ProjectDescription(BaseModel):
+class ProjectDescription(ProjectCreate):
+    """Full project representation returned from the API (includes project_id)."""
     project_id: str
-    project_name: str
-    project_type: str
-    business_unit: str
-    domain: str
-    project_overview: ProjectOverview
-    project_duration: ProjectDuration
-    required_roles: List[Role]
-    required_skills: List[Skill]
-    responsibilities: List[str]
-    delivery_model: DeliveryModel
-    deployment_readiness_criteria: DeploymentReadinessCriteria
-    status: StatusModel
 
 
 class ProjectSummary(BaseModel):
+    """Lightweight project list item."""
     project_id: str
     project_name: str
     domain: str
     business_unit: str
     project_type: str
-    current_status: Optional[str]='open'
+    current_status: Optional[str] = "open"
     deployment_stage: str
 
 
-# ---------- Employee Schemas ----------
+# ══════════════════════════════════════════════════════════════════════════════
+# EMPLOYEE
+# ══════════════════════════════════════════════════════════════════════════════
 
 class Employee(BaseModel):
+    """
+    Core employee model.
+    password is excluded from all API responses via response_model or
+    the exclude_password() helper on EmployeePublic.
+    """
     employee_id: str
-    password:Optional[str]=None
-    email:str
     name: str
+    email: str
+    role: str                          # "EMPLOYEE" | "HR" | "ADMIN"
     skills: List[str]
-    experience: int
+    experience: float
+    status: str
+    designation: Optional[str] = None
+    department: Optional[str] = None
+    # password stored hashed in employees.json — never returned in responses
+    password: Optional[str] = None
+
+
+class EmployeePublic(BaseModel):
+    """Employee fields safe to return in API responses (password excluded)."""
+    employee_id: str
     name: str
+    email: str
     role: str
     skills: List[str]
     experience: float
     status: str
-    designation: Optional[str]=None
-    department: Optional[str]=None
+    designation: Optional[str] = None
+    department: Optional[str] = None
 
-class SuggestedEmployee(Employee):
+
+class SuggestedEmployee(EmployeePublic):
+    """EmployeePublic extended with matching metadata."""
     match_percentage: int
     matched_skills: List[str]
     missing_skills: List[str]
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# CHATBOT / SCORING
+# ══════════════════════════════════════════════════════════════════════════════
 
-
-from pydantic import BaseModel, Field, EmailStr
-from typing import List, Literal
-
-
-# ---------------------------
-# NLP Score Model
-# ---------------------------
 class NLPScore(BaseModel):
     word_count: int
     keyword_hits: int
     nlp_score: float
 
 
-# ---------------------------
-# LLM Score Model
-# ---------------------------
 class LLMScore(BaseModel):
     relevance: int
     depth: int
@@ -143,18 +157,12 @@ class LLMScore(BaseModel):
     feedback: str
 
 
-# ---------------------------
-# Overall Score Model
-# ---------------------------
 class Score(BaseModel):
     final_score: float
     nlp: NLPScore
     llm: LLMScore
 
 
-# ---------------------------
-# Response Item Model
-# ---------------------------
 class ResponseItem(BaseModel):
     topic: str
     question: str
@@ -162,19 +170,73 @@ class ResponseItem(BaseModel):
     score: Score
 
 
-# ---------------------------
-# Main Employee Response Schema
-# ---------------------------
 class EmployeeResponse(BaseModel):
     employee_email: EmailStr
     role: Literal["EMPLOYEE", "HR", "ADMIN"]
     responses: List[ResponseItem] = Field(default_factory=list)
-    
+
 
 class TopicResponseCreate(BaseModel):
-    employee_id:str
+    """Payload sent by the chatbot when submitting an answer."""
+    employee_id: str
     employee_email: str
     role: str
     topic: str
     question: str
     answer: str
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AUTHENTICATION  (new)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class LoginRequest(BaseModel):
+    """Body for POST /auth/login"""
+    email: EmailStr
+    password: str
+
+
+class TokenResponse(BaseModel):
+    """
+    Returned by POST /auth/login and POST /auth/refresh.
+    access_token  — short-lived JWT (Bearer) sent with every API call.
+    token_type    — always "bearer".
+    employee      — public profile of the authenticated user (no password).
+    """
+    access_token: str
+    token_type: str = "bearer"
+    employee: EmployeePublic
+
+
+class TokenData(BaseModel):
+    """
+    Claims embedded inside the JWT payload.
+    employee_id and role are used by get_current_user() for fast lookups.
+    """
+    employee_id: str
+    email: str
+    role: str
+
+
+class ChangePasswordRequest(BaseModel):
+    """Body for POST /auth/change-password"""
+    current_password: str
+    new_password: str
+
+
+class RegisterRequest(BaseModel):
+    """
+    Body for POST /auth/register (ADMIN only).
+    All fields mirror the Employee model; password is plain-text here
+    and hashed before storage.
+    """
+    employee_id: str
+    name: str
+    email: EmailStr
+    password: str
+    role: Literal["EMPLOYEE", "HR", "ADMIN"] = "EMPLOYEE"
+    skills: List[str] = Field(default_factory=list)
+    experience: float = 0.0
+    status: str = "Bench"
+    designation: Optional[str] = None
+    department: Optional[str] = None

@@ -2,149 +2,128 @@ import { useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEmployee ,useEmployeeChatData} from "@/api/hooks";
-import { EMPLOYEES } from "@/types/Employee";
+import { useEmployee, useEmployeeChatData } from "@/api/hooks";
 
 export default function EmployeeDetails() {
-  const { id } = useParams();
-  const { data: apiEmployee } = useEmployee(id);
-  const { data: apiChatData, isLoading } = useEmployeeChatData(id);
-  console.log(apiEmployee)
-  console.log(apiChatData)
-  // Fallback to local mock data if API fails
-  const employee = apiEmployee ?? EMPLOYEES.find((e) => e.employee_id === id);
-   
-  if (isLoading) {
-    return (
-      <div className="p-8 max-w-4xl mx-auto space-y-6">
-        <Skeleton className="h-64 rounded-xl" />
-      </div>
-    );
-  }
+  const { id } = useParams<{ id: string }>();
+  const { data: employee, isLoading: empLoading, isError: empError } = useEmployee(id);
+  const { data: chatData, isLoading: chatLoading } = useEmployeeChatData(id);
 
-  if (!employee) {
-    return (
-      <div className="p-8 text-center text-muted-foreground">Employee not found</div>
-    );
-  }
+  if (empLoading) return (
+    <div className="p-8 max-w-4xl mx-auto space-y-4">
+      <Skeleton className="h-48 rounded-xl" />
+      <Skeleton className="h-64 rounded-xl" />
+    </div>
+  );
+
+  if (empError || !employee) return (
+    <div className="p-8 text-center text-muted-foreground">Employee not found</div>
+  );
 
   return (
-  <div className="p-8 max-w-4xl mx-auto space-y-6">
-    
-    {/* ========================= */}
-    {/* Employee Basic Info Card */}
-    {/* ========================= */}
-    <Card className="border-2 border-border shadow-md">
-      <CardHeader className="border-b-2 border-border">
-        <CardTitle className="text-2xl">{employee.name}</CardTitle>
-      </CardHeader>
+    <div className="p-8 max-w-4xl mx-auto space-y-6">
 
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InfoRow label="Email" value={employee.email} />
-          <InfoRow label="Role" value={employee.role} />
-          <InfoRow label="Experience" value={`${employee.experience} years`} />
-          <InfoRow label="Designation" value={employee.designation ?? "—"} />
-          <InfoRow label="Department" value={employee.department ?? "—"} />
-
-          <div>
-            <span className="text-sm font-medium text-muted-foreground">Status</span>
-            <div className="mt-1">
-              <Badge variant={employee.status === "Allocated" ? "default" : "secondary"}>
-                {employee.status}
-              </Badge>
+      {/* Profile card */}
+      <Card className="border-2 border-border shadow-md">
+        <CardHeader className="border-b-2 border-border">
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-2xl">{employee.name}</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">{employee.designation} · {employee.department}</p>
             </div>
+            <Badge variant={employee.status === "Allocated" ? "default" : "secondary"} className="text-sm">
+              {employee.status}
+            </Badge>
           </div>
-        </div>
-
-        <div>
-          <span className="text-sm font-medium text-muted-foreground">Skills</span>
-          <div className="flex gap-2 mt-2 flex-wrap">
-            {employee.skills?.map((s: string) => (
-              <Badge key={s} variant="secondary">
-                {s}
-              </Badge>
-            ))}
+        </CardHeader>
+        <CardContent className="pt-4 space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            <Info label="Email" value={employee.email} />
+            <Info label="Role" value={employee.role} />
+            <Info label="Experience" value={`${employee.experience} years`} />
+            <Info label="Designation" value={employee.designation ?? "—"} />
+            <Info label="Department" value={employee.department ?? "—"} />
+            <Info label="Employee ID" value={employee.employee_id} />
           </div>
-        </div>
-      </CardContent>
-    </Card>
-
-    {/* ========================= */}
-    {/* Employee Responses Card */}
-    {/* ========================= */}
-    <Card className="border-2 border-border shadow-md">
-      <CardHeader className="border-b-2 border-border">
-        <CardTitle className="text-xl">Assessment Responses</CardTitle>
-      </CardHeader>
-
-      <CardContent className="space-y-6 max-h-[500px] overflow-y-auto">
-        {apiChatData.responses && apiChatData.responses.length > 0 ? (
-          apiChatData.responses.map((response: any, index: number) => (
-            <div
-              key={index}
-              className="border rounded-lg p-4 space-y-3 bg-muted/30"
-            >
-              <div>
-                <p className="text-sm font-semibold text-muted-foreground">
-                  Question
-                </p>
-                <p className="text-foreground">{response.question}</p>
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-muted-foreground">
-                  Answer
-                </p>
-                <p className="text-foreground">{response.answer}</p>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2 border-t">
-                <ScoreItem label="Final Score" value={response.score?.final_score} />
-                <ScoreItem label="NLP Score" value={response.score?.nlp?.nlp_score} />
-                <ScoreItem label="Relevance" value={response.score?.llm?.relevance} />
-                <ScoreItem label="Clarity" value={response.score?.llm?.clarity} />
-              </div>
-
-              {response.score?.llm?.feedback && (
-                <div className="pt-2">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    AI Feedback
-                  </p>
-                  <p className="text-sm italic text-foreground">
-                    {response.score.llm.feedback}
-                  </p>
-                </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-2">Skills</p>
+            <div className="flex flex-wrap gap-2">
+              {employee.skills?.map((s) => <Badge key={s} variant="secondary">{s}</Badge>)}
+              {(!employee.skills || employee.skills.length === 0) && (
+                <span className="text-sm text-muted-foreground">No skills listed</span>
               )}
             </div>
-          ))
-        ) : (
-          <p className="text-muted-foreground text-sm">
-            No assessment responses available.
-          </p>
-        )}
-      </CardContent>
-    </Card>
-  </div>
-);
+          </div>
+        </CardContent>
+      </Card>
 
-}
-function ScoreItem({ label, value }: { label: string; value?: number }) {
-  return (
-    <div>
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="text-sm font-semibold text-foreground">
-        {value !== undefined ? value : "—"}
-      </p>
+      {/* Assessment responses */}
+      <Card className="border-2 border-border shadow-md">
+        <CardHeader className="border-b-2 border-border">
+          <CardTitle className="text-xl">
+            Assessment Responses
+            {chatData?.responses && (
+              <span className="ml-2 text-sm font-normal text-muted-foreground">
+                ({chatData.responses.length} responses)
+              </span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4 max-h-[600px] overflow-y-auto space-y-4">
+          {chatLoading ? (
+            <div className="space-y-3">{[1, 2].map((i) => <Skeleton key={i} className="h-24 rounded" />)}</div>
+          ) : chatData?.responses?.length ? (
+            chatData.responses.map((r: any, i: number) => (
+              <div key={i} className="border rounded-lg p-4 space-y-3 bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs">{r.topic}</Badge>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground">Question</p>
+                  <p className="text-sm mt-0.5">{r.question}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground">Answer</p>
+                  <p className="text-sm mt-0.5">{r.answer}</p>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t">
+                  <Score label="Final Score" value={r.score?.final_score} max={5} />
+                  <Score label="NLP Score" value={r.score?.nlp?.nlp_score} max={5} />
+                  <Score label="Relevance" value={r.score?.llm?.relevance} max={5} />
+                  <Score label="Clarity" value={r.score?.llm?.clarity} max={5} />
+                </div>
+                {r.score?.llm?.feedback && (
+                  <div className="text-xs italic text-muted-foreground border-l-2 border-primary/30 pl-2">
+                    {r.score.llm.feedback}
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-muted-foreground text-sm text-center py-6">No assessment responses yet.</p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <span className="text-sm font-medium text-muted-foreground">{label}</span>
-      <p className="text-foreground">{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-sm font-medium mt-0.5">{value}</p>
+    </div>
+  );
+}
+
+function Score({ label, value, max }: { label: string; value?: number; max: number }) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-sm font-semibold mt-0.5">
+        {value !== undefined ? `${value} / ${max}` : "—"}
+      </p>
     </div>
   );
 }

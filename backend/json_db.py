@@ -1,74 +1,77 @@
+"""
+json_db.py
+──────────
+Thin helpers for reading and writing JSON flat-files that act as the database.
+
+All paths are resolved relative to this file's directory so the server
+can be started from any working directory.
+"""
+
+from __future__ import annotations
+
 import json
 import os
-from typing import List
-
-BASE_DIR =  os.path.dirname(__file__)
-DATA_DIR = os.path.join(BASE_DIR, "data")
-
-
-def read_json(filename: str):
-    path = os.path.join(DATA_DIR, filename)
-    with open(path, "r") as f:
-        return json.load(f)
-
-
-def write_json(filename: str, data):
-    path = os.path.join(DATA_DIR, filename)
-    with open(path, "w") as f:
-        json.dump(data, f, indent=4)
+from pathlib import Path
+from typing import Any
 
 from fastapi.encoders import jsonable_encoder
 
-def append_json(filename, new_data):
-    if not os.path.exists(filename):
-        with open(filename, "w") as f:
-            json.dump([], f)
+BASE_DIR: Path = Path(__file__).resolve().parent
+DATA_DIR: Path = BASE_DIR / "data"
 
-    with open(filename, "r") as f:
-        data = json.load(f)
 
-    # 🔥 Convert datetime & other types
-    new_data = jsonable_encoder(new_data)
+def _resolve(filename: str | Path) -> Path:
+    """
+    Return an absolute path.
 
-    data.append(new_data)
+    If *filename* is already absolute (e.g. a Path passed directly from a
+    route handler) it is returned as-is.  Otherwise it is joined to DATA_DIR.
+    """
+    p = Path(filename)
+    return p if p.is_absolute() else DATA_DIR / p
 
-    with open(filename, "w") as f:
-        json.dump(data, f, indent=4)
-import json
-import os
 
-def append_json(file_path,new_data):
-   
-    
-    # If file doesn't exist, create with empty list
-    if not os.path.exists(file_path):
-        with open(file_path, "w") as f:
-            json.dump([], f)
+# ── Public API ────────────────────────────────────────────────────────────────
 
-    # Read existing data
-    with open(file_path, "r") as f:
+def read_json(filename: str | Path) -> Any:
+    """Read and parse a JSON file. Returns the decoded Python object."""
+    path = _resolve(filename)
+    with open(path, "r", encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def write_json(filename: str | Path, data: Any) -> None:
+    """Serialise *data* to JSON and overwrite *filename*."""
+    path = _resolve(filename)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(data, fh, indent=4, ensure_ascii=False)
+
+
+def append_json(filename: str | Path, new_item: Any) -> None:
+    """
+    Append *new_item* to the JSON list stored in *filename*.
+
+    - Creates the file with an empty list if it does not exist.
+    - Calls jsonable_encoder so datetime / UUID objects serialise correctly.
+    - Raises ValueError if the root element is not a list.
+    """
+    path = _resolve(filename)
+
+    if not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("[]", encoding="utf-8")
+
+    with open(path, "r", encoding="utf-8") as fh:
         try:
-            data = json.load(f)
+            data: list = json.load(fh)
         except json.JSONDecodeError:
             data = []
 
-    # Ensure it's a list
     if not isinstance(data, list):
-        raise ValueError("JSON file must contain a list")
+        raise ValueError(f"{path} must contain a JSON list, not {type(data).__name__}")
 
-    # Append data
-    if isinstance(new_data, list):
-        data.extend(new_data)
-    else:
-        data.append(new_data)
+    data.append(jsonable_encoder(new_item))
 
-    # Write back updated data
-    with open(file_path, "w") as f:
-        json.dump(data, f, indent=4)
-
-
-# def append_json(filename: str, new_item):
-#     data = read_json(filename)
-#     data.append(new_item)
-#     write_json(filename, data)
-#     return new_item
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(data, fh, indent=4, ensure_ascii=False)

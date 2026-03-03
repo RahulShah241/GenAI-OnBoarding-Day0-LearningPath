@@ -1,0 +1,197 @@
+{
+  "employee_id": "E001",
+  "employee_email": "rahul@company.com",
+  "role": "EMPLOYEE",
+  "responses": [
+    {
+      "topic": "Role",
+      "question": "Can you briefly describe your current role and the type of work you handle on a regular basis?",
+      "answer": "I work as a software developer. My day-to-day responsibilities include developing new features, fixing bugs, reviewing code, and working with my team to deliver updates on time.",
+      "score": {
+        "final_score": 4.67,
+        "nlp": {
+          "word_count": 27,
+          "keyword_hits": 2,
+          "nlp_score": 5.0
+        },
+        "llm": {
+          "relevance": 4,
+          "depth": 4,
+          "clarity": 5,
+          "feedback": "The answer provides a clear and concise overview of the employee's role, but could benefit from more specific examples of their accomplishments and impact on the team."
+        }
+      }
+    },
+    {
+      "topic": "Skills",
+      "question": "Are there any tools, technologies, or working methodologies that you feel confident using?",
+      "answer": ": I am comfortable working with Agile processes, Git-based workflows, REST API development, and have basic exposure to cloud platforms.",
+      "score": {
+        "final_score": 4.33,
+        "nlp": {
+          "word_count": 20,
+          "keyword_hits": 1,
+          "nlp_score": 5.0
+        },
+        "llm": {
+          "relevance": 4,
+          "depth": 3,
+          "clarity": 4,
+          "feedback": "Consider providing more specific examples of when you've applied these tools in a work environment to demonstrate their actual use."
+        }
+      }
+    },
+    {
+      "topic": "Experience",
+      "question": "How would you summarize your overall professional experience so far?",
+      "answer": "So far, I have worked on both internal tools and client-facing applications, which helped me understand the full development lifecycle from requirement gathering to deployment.",
+      "score": {
+        "final_score": 4.5,
+        "nlp": {
+          "word_count": 25,
+          "keyword_hits": 1,
+          "nlp_score": 5.0
+        },
+        "llm": {
+          "relevance": 4,
+          "depth": 3,
+          "clarity": 5,
+          "feedback": "Consider being more specific about the types of tools and applications you've worked on"
+        }
+      }
+    },
+    {
+      "topic": "Communication",
+      "question": "What has been your experience working as part of a team?",
+      "answer": "I have worked in small to medium-sized teams where collaboration, regular discussions, and peer support were important to complete work successfully.",
+      "score": {
+        "final_score": 2.5,
+        "nlp": {
+          "word_count": 21,
+          "keyword_hits": 2,
+          "nlp_score": 5.0
+        },
+        "llm": {
+          "relevance": 0,
+          "depth": 0,
+          "clarity": 0,
+          "feedback": "LLM evaluation unavailable"
+        }
+      }
+    },
+    {
+      "topic": "Ownership",
+      "question": "How do you usually plan and complete the tasks assigned to you?",
+      "answer": "I start by understanding the requirement clearly, break the task into smaller steps, set timelines, and track progress until the task is completed.",
+      "score": {
+        "final_score": 2.5,
+        "nlp": {
+          "word_count": 23,
+          "keyword_hits": 0,
+          "nlp_score": 5.0
+        },
+        "llm": {
+          "relevance": 0,
+          "depth": 0,
+          "clarity": 0,
+          "feedback": "LLM evaluation unavailable"
+        }
+      }
+    },
+    {
+      "topic": "Collaboration",
+      "question": "What helps you stay aligned and avoid misunderstandings while working with others?",
+      "answer": "Having clear requirements, written documentation, meeting notes, and confirmation of next steps helps me stay aligned.",
+      "score": {
+        "final_score": 4.43,
+        "nlp": {
+          "word_count": 16,
+          "keyword_hits": 0,
+          "nlp_score": 4.2
+        },
+        "llm": {
+          "relevance": 4,
+          "depth": 5,
+          "clarity": 5,
+          "feedback": "Providing specific examples of when these tools were used would enhance the answer."
+        }
+      }
+    },
+    {
+      "topic": "Problem-Solving",
+      "question": "How do you usually approach solving problems in your work?",
+      "answer": "I first understand the problem clearly, analyze possible solutions, discuss if needed, and then implement and test the best solution.",
+      "score": {
+        "final_score": 4.83,
+        "nlp": {
+          "word_count": 20,
+          "keyword_hits": 0,
+          "nlp_score": 5.0
+        },
+        "llm": {
+          "relevance": 4,
+          "depth": 5,
+          "clarity": 5,
+          "feedback": "Well-structured answer that demonstrates a logical and systematic approach to problem-solving."
+        }
+      }
+    },
+    {
+      "topic": "Learning",
+      "question": "Which skills or areas are you currently interested in improving or learning next?",
+      "answer": "I want to improve my system design skills and learn more about cloud-native and AI-driven applications.",
+      "score": {
+        "final_score": 4.1,
+        "nlp": {
+          "word_count": 16,
+          "keyword_hits": 0,
+          "nlp_score": 4.2
+        },
+        "llm": {
+          "relevance": 4,
+          "depth": 3,
+          "clarity": 5,
+          "feedback": "Consider being more specific about what you hope to learn and how you plan to apply these new skills"
+        }
+      }
+    },
+    {
+      "topic": "Workstyle",
+      "question": "How would you describe your preferred way of working?",
+      "answer": "I prefer working in a structured environment with clear goals, but I also like having flexibility to explore better solutions.",
+      "score": {
+        "final_score": 2.5,
+        "nlp": {
+          "word_count": 20,
+          "keyword_hits": 0,
+          "nlp_score": 5.0
+        },
+        "llm": {
+          "relevance": 0,
+          "depth": 0,
+          "clarity": 0,
+          "feedback": "LLM evaluation unavailable"
+        }
+      }
+    },
+    {
+      "topic": "Validation",
+      "question": "Does the profile summary generated by the AI accurately represent your skills and experience?",
+      "answer": "Yes, the summary reflects my experience accurately. Most of my skills and past work have been captured well.",
+      "score": {
+        "final_score": 4.3,
+        "nlp": {
+          "word_count": 18,
+          "keyword_hits": 0,
+          "nlp_score": 4.6
+        },
+        "llm": {
+          "relevance": 4,
+          "depth": 3,
+          "clarity": 5,
+          "feedback": "Consider providing specific examples to support your claims"
+        }
+      }
+    }
+  ]
+}
