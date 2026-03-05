@@ -84,15 +84,15 @@ app = FastAPI(
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
-_raw_origins = os.getenv("ALLOWED_ORIGINS", ["http://localhost:8000"])
+origins = os.getenv("ALLOWED_ORIGINS", ["http://localhost:8000","https://genai-onboarding-day0-learningpath-1.onrender.com"])
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # for dev only
+    allow_origins=origins,  # for dev only
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+ALLOWED_ORIGINS: list[str] = [o.strip() for o in origins.split(",") if o.strip()]
 
 # app.add_middleware(
 #     CORSMiddleware,
