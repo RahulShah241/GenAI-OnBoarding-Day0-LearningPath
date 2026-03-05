@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => ({
       allowedHosts: [
         "genai-onboarding-day0-learningpath-1.onrender.com"
       ]
-    }
+    },
     proxy: {
       "/api": "http://localhost:8000",
     },
