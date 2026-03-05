@@ -12,7 +12,12 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
     // vite.config.js
- 
+    server: {
+      host: true,
+      allowedHosts: [
+        "genai-onboarding-day0-learningpath-1.onrender.com"
+      ]
+    }
     proxy: {
       "/api": "http://localhost:8000",
     },
