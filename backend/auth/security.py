@@ -32,14 +32,21 @@ ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
 # ── Password hashing ─────────────────────────────────────────────────────────
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+def _normalize_password(password: str) -> str:
+    """
+    Bcrypt only supports 72 bytes.
+    Truncate safely to avoid runtime errors.
+    """
+    return password.encode("utf-8")[:72].decode("utf-8", "ignore")
+
 
 def hash_password(plain: str) -> str:
-    """Return a bcrypt hash of *plain*."""
+    plain = _normalize_password(plain)
     return pwd_context.hash(plain)
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    """Return True if *plain* matches *hashed*."""
+    plain = _normalize_password(plain)
     return pwd_context.verify(plain, hashed)
 
 
