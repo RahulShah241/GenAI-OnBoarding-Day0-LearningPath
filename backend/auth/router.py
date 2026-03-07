@@ -89,7 +89,7 @@ def login(payload: LoginRequest) -> TokenResponse:
     # Once a user logs in their password is transparently upgraded to bcrypt.
     password_ok: bool = False
     needs_upgrade: bool = False
-
+    print(stored_password,payload.password)
     if stored_password.startswith("$2b$") or stored_password.startswith("$2a$"):
         # Already hashed — use bcrypt verification
         password_ok = verify_password(payload.password, stored_password)

@@ -13,7 +13,9 @@ export default defineConfig(({ mode }) => ({
     },
     // vite.config.js
     allowedHosts: [
-      "genai-onboarding-day0-learningpath-1.onrender.com"
+      // "genai-onboarding-day0-learningpath-1.onrender.com",
+      "genai-onboarding-day0-learningpath.onrender.com",
+      "localhost:8000"
     ],
     proxy: {
       "/api": "http://localhost:8000",

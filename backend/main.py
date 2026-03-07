@@ -84,23 +84,24 @@ app = FastAPI(
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
-origins = os.getenv("ALLOWED_ORIGINS", ["http://localhost:8000","https://genai-onboarding-day0-learningpath-1.onrender.com"])
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,  # for dev only
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-ALLOWED_ORIGINS: list[str] = [o.strip() for o in origins.split(",") if o.strip()]
-
+origins = os.getenv("ALLOWED_ORIGINS", '''"http://localhost:8080","https://genai-onboarding-day0-learningpath-1.onrender.com"''')
 # app.add_middleware(
 #     CORSMiddleware,
-#     allow_origins=ALLOWED_ORIGINS,
+#     allow_origins=origins,  # for dev only
 #     allow_credentials=True,
 #     allow_methods=["*"],
 #     allow_headers=["*"],
 # )
+ALLOWED_ORIGINS: list[str] = [o.strip() for o in origins.split(",") if o.strip()]
+
+ALLOWED_ORIGINS=origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ── Mount auth router ─────────────────────────────────────────────────────────
 app.include_router(auth_router)
