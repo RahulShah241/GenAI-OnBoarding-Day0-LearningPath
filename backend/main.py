@@ -140,7 +140,45 @@ def _employee_to_public(emp: dict) -> dict:
 # ══════════════════════════════════════════════════════════════════════════════
 # CHATBOT — topic responses
 # ══════════════════════════════════════════════════════════════════════════════
+def generate_employee_profile(data):
 
+    responses = data["responses"]
+
+    scores = []
+    soft_skills = {}
+    learning = []
+    role_summary = ""
+
+    for r in responses:
+        scores.append(r["score"]["final_score"])
+
+        topic = r["topic"]
+        answer = r["answer"]
+
+        if topic == "Role":
+            role_summary = answer
+
+        if topic == "Learning":
+            learning.append(answer)
+
+        if topic in ["Communication", "Collaboration", "Problem-Solving", "Ownership"]:
+            soft_skills[topic.lower()] = r["score"]["final_score"]
+
+    overall = sum(scores) / len(scores)
+
+    return {
+        "employee_id": data["employee_id"],
+        "email": data["employee_email"],
+        "role_summary": role_summary,
+        "soft_skills": soft_skills,
+        "learning_interests": learning,
+        "overall_score": round(overall, 2),
+        "readiness": (
+            "High" if overall >= 4.5
+            else "Moderate" if overall >= 3
+            else "Needs Development"
+        )
+    }
 @app.post(
     "/employee/topic-response",
     summary="Submit a chatbot answer and receive an evaluation score",
@@ -184,7 +222,7 @@ def save_topic_response(
     file_path.write_text(
         json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
     )
-
+    
     return {
         "message": "Response saved & evaluated",
         "topic": payload.topic,
