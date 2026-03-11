@@ -12,6 +12,7 @@ import { AppBreadcrumb } from "@/components/AppBreadcrumb";
 import Login from "@/pages/Login";
 import AdminDashboard from "@/pages/AdminDashboard";
 import HRDashboard from "@/pages/HRDashboard";
+import HRProfiles from "@/pages/HRProfiles";
 import EmployeeChatbot from "@/pages/EmployeeChatbot";
 import ProjectsDetailsPage from "@/pages/ProjectsDetailsPage";
 import ProjectsList from "@/pages/ProjectsList";
@@ -24,7 +25,6 @@ import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
-/* Layout Wrapper — renders shared Navbar + page content */
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
   <>
     <Navbar />
@@ -121,16 +121,25 @@ const App = () => (
             }
           />
           <Route
-  path="/hr/projects/:projectId/suggested-employees"
-  element={
-    <ProtectedRoute roles={["HR"]}>
-      <AppLayout>
-        <HRProjectSuggestions />
-      </AppLayout>
-    </ProtectedRoute>
-  }
-/>
-
+            path="/hr/projects/:projectId/suggested-employees"
+            element={
+              <ProtectedRoute roles={["HR"]}>
+                <AppLayout>
+                  <HRProjectSuggestions />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/hr/profiles"
+            element={
+              <ProtectedRoute roles={["HR"]}>
+                <AppLayout>
+                  <HRProfiles />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
 
           {/* ================= EMPLOYEE ================= */}
           <Route

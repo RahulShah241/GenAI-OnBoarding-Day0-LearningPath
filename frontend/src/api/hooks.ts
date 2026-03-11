@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ProjectDescription, ProjectSummary } from "@/types/Project";
 import type { Employee } from "@/types/Employee";
 import type { EmployeeResponse } from "@/types/ChatData";
+import type { EmployeeProfile } from "@/api/api";
 import { Data } from "@/store/Data";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
@@ -12,7 +13,6 @@ async function authFetch(url: string, init: RequestInit = {}): Promise<Response>
   const merged = { ...init, headers: { ...headers, ...(init.headers ?? {}) } };
   const res = await fetch(url, merged);
   if (res.status === 401) {
-    // Token expired — force logout so the user is redirected to login
     Data.getState().logout();
   }
   return res;
@@ -92,6 +92,33 @@ export function useEmployeeChatData(id: string | undefined) {
     queryKey: ["employee-chat", id],
     queryFn: () => authFetch(`${BASE}/employees/chatdata/${id}`).then((r) => checked<EmployeeResponse>(r)),
     enabled: !!id,
+    retry: 1,
+    staleTime: 30_000,
+  });
+}
+
+// ─── Profiles ─────────────────────────────────────────────────────────────────
+
+export function useEmployeeProfile(employeeId: string | undefined) {
+  return useQuery<EmployeeProfile>({
+    queryKey: ["employee-profile", employeeId],
+    queryFn: () =>
+      authFetch(`${BASE}/employee/profile/${employeeId}`).then((r) =>
+        checked<EmployeeProfile>(r)
+      ),
+    enabled: !!employeeId,
+    retry: 1,
+    staleTime: 60_000,
+  });
+}
+
+export function useAllProfiles() {
+  return useQuery<EmployeeProfile[]>({
+    queryKey: ["hr-profiles"],
+    queryFn: () =>
+      authFetch(`${BASE}/hr/employee-profiles`).then((r) =>
+        checked<EmployeeProfile[]>(r)
+      ),
     retry: 1,
     staleTime: 30_000,
   });

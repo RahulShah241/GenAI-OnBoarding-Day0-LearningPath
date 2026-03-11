@@ -3,30 +3,17 @@ main.py
 ───────
 FastAPI application entry point.
 
-All original API routes are preserved with the same URLs and response shapes.
-JWT authentication is added via Depends(get_current_user) / Depends(require_roles(...)).
-
-Route protection summary
-────────────────────────
-  POST /auth/login                          — open (no token required)
-  POST /auth/register                       — ADMIN only
-  GET  /auth/me                             — any authenticated user
-  POST /auth/change-password                — any authenticated user
-
-  GET  /projects                            — HR, ADMIN
-  GET  /projectsDescrition                  — HR, ADMIN          (original typo kept for frontend compat)
-  GET  /projects/{project_id}               — HR, ADMIN, EMPLOYEE
-  POST /project                             — HR, ADMIN
-
-  GET  /employees                           — HR, ADMIN
-  GET  /employees/{employee_id}             — HR, ADMIN
-  GET  /employees/chatdata/{employee_id}    — HR, ADMIN, EMPLOYEE (own data only for EMPLOYEE)
-  POST /employees                           — ADMIN only
-
-  POST /employee/topic-response             — EMPLOYEE, HR, ADMIN
-  GET  /employee/{email}                    — HR, ADMIN
-
-  GET  /projects/{project_id}/suggested-employees — HR, ADMIN
+New in v3
+─────────
+  • NLP threshold enforcement — answers scoring below SCORE_THRESHOLD return
+    threshold_passed=False and a retry message; the answer is NOT stored.
+  • Profile generation — after every topic submission the full EmployeeProfile
+    is regenerated and saved to  data/profiles/{employee_id}.json
+  • Skill sync — merged_skills from the profile are written back to
+    employees.json so job-matching always uses the richest skill set.
+  • GET /employee/profile/{employee_id}       — own profile (EMPLOYEE) or any (HR/ADMIN)
+  • GET /hr/employee-profiles                 — HR/ADMIN list of all profiles
+  • POST /employee/finalize-profile           — explicitly regenerate + store profile
 """
 
 from __future__ import annotations
@@ -44,10 +31,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
-# ── Load .env before any os.getenv() calls ────────────────────────────────────
 load_dotenv()
 
-# ── Internal imports ──────────────────────────────────────────────────────────
 from auth.dependencies import get_current_user, require_roles
 from auth.router import router as auth_router
 from json_db import append_json, read_json, write_json
@@ -63,38 +48,32 @@ from schemas import (
     TopicResponseCreate,
 )
 from services.llm_scoring import llm_score
-from services.nlp_scoring import nlp_score
+from services.nlp_scoring import nlp_score, SCORE_THRESHOLD
 from services.scoring_engine import combine_scores
+from services.profile_generator import generate_profile
 
-# ── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s  %(levelname)-8s  %(name)s — %(message)s",
 )
 logger = logging.getLogger(__name__)
 
-# ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
     title="Employee–Project Matching Platform",
     description=(
         "AI-assisted HR platform for matching employees to projects. "
         "All endpoints (except /auth/login) require a valid JWT Bearer token."
     ),
-    version="2.0.0",
+    version="3.0.0",
 )
 
-# ── CORS ──────────────────────────────────────────────────────────────────────
-origins = os.getenv("ALLOWED_ORIGINS", '''"http://localhost:8080","https://genai-onboarding-day0-learningpath-1.onrender.com"''')
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins,  # for dev only
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    '"http://localhost:8080","https://genai-onboarding-day0-learningpath-1.onrender.com"',
+)
 ALLOWED_ORIGINS: list[str] = [o.strip() for o in origins.split(",") if o.strip()]
+ALLOWED_ORIGINS = origins
 
-ALLOWED_ORIGINS=origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -103,12 +82,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Mount auth router ─────────────────────────────────────────────────────────
 app.include_router(auth_router)
 
-# ── Ensure employee-response directory exists ─────────────────────────────────
 _RESPONSE_DIR = Path(__file__).resolve().parent / "data" / "employee_responses"
+_PROFILE_DIR = Path(__file__).resolve().parent / "data" / "profiles"
 _RESPONSE_DIR.mkdir(parents=True, exist_ok=True)
+_PROFILE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -116,11 +95,6 @@ _RESPONSE_DIR.mkdir(parents=True, exist_ok=True)
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _safe_email_to_filename(email: str) -> str:
-    """
-    Convert an email address to a safe filename stem.
-    Strips everything except alphanumeric, @, . and - before substituting.
-    Prevents path-traversal attacks.
-    """
     sanitised = re.sub(r"[^a-zA-Z0-9@._-]", "", email)
     return sanitised.replace("@", "_AT_").replace(".", "_")
 
@@ -132,53 +106,56 @@ def get_employee_file(email: str) -> Path:
     return _RESPONSE_DIR / f"{stem}.json"
 
 
+def get_profile_file(employee_id: str) -> Path:
+    safe = re.sub(r"[^a-zA-Z0-9_-]", "_", employee_id)
+    return _PROFILE_DIR / f"{safe}.json"
+
+
 def _employee_to_public(emp: dict) -> dict:
-    """Return employee dict with the password field removed."""
     return {k: v for k, v in emp.items() if k != "password"}
+
+
+def _get_base_employee(employee_id: str) -> dict | None:
+    employees: list[dict] = read_json("employees.json")
+    return next((e for e in employees if e["employee_id"] == employee_id), None)
+
+
+def _sync_skills_to_employee(employee_id: str, merged_skills: list[str]) -> None:
+    """Update the skills array in employees.json with NLP-extracted skills."""
+    employees: list[dict] = read_json("employees.json")
+    for emp in employees:
+        if emp["employee_id"] == employee_id:
+            existing = set(s.lower() for s in emp.get("skills", []))
+            new_skills = [s for s in merged_skills if s.lower() not in existing]
+            emp["skills"] = emp.get("skills", []) + new_skills
+            break
+    write_json("employees.json", employees)
+
+
+def _regenerate_and_save_profile(response_data: dict) -> dict:
+    """Generate profile, save it, sync skills. Returns the profile dict."""
+    employee_id = response_data.get("employee_id", "")
+    base_emp = _get_base_employee(employee_id)
+    profile = generate_profile(response_data, base_employee=base_emp)
+
+    profile_file = get_profile_file(employee_id)
+    profile_file.write_text(
+        json.dumps(profile, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+
+    # Sync skills back to employees.json
+    merged = profile.get("merged_skills", [])
+    if merged:
+        _sync_skills_to_employee(employee_id, merged)
+
+    logger.info("Profile regenerated for %s (score=%.2f)", employee_id, profile["overall_score"])
+    return profile
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CHATBOT — topic responses
 # ══════════════════════════════════════════════════════════════════════════════
-def generate_employee_profile(data):
 
-    responses = data["responses"]
-
-    scores = []
-    soft_skills = {}
-    learning = []
-    role_summary = ""
-
-    for r in responses:
-        scores.append(r["score"]["final_score"])
-
-        topic = r["topic"]
-        answer = r["answer"]
-
-        if topic == "Role":
-            role_summary = answer
-
-        if topic == "Learning":
-            learning.append(answer)
-
-        if topic in ["Communication", "Collaboration", "Problem-Solving", "Ownership"]:
-            soft_skills[topic.lower()] = r["score"]["final_score"]
-
-    overall = sum(scores) / len(scores)
-
-    return {
-        "employee_id": data["employee_id"],
-        "email": data["employee_email"],
-        "role_summary": role_summary,
-        "soft_skills": soft_skills,
-        "learning_interests": learning,
-        "overall_score": round(overall, 2),
-        "readiness": (
-            "High" if overall >= 4.5
-            else "Moderate" if overall >= 3
-            else "Needs Development"
-        )
-    }
 @app.post(
     "/employee/topic-response",
     summary="Submit a chatbot answer and receive an evaluation score",
@@ -189,12 +166,28 @@ def save_topic_response(
     _current: TokenData = Depends(get_current_user),
 ) -> dict:
     """
-    Save a chatbot answer, run NLP + LLM scoring, persist the result.
-
-    Available to EMPLOYEE, HR, and ADMIN.
+    Score the answer. If it passes the NLP threshold, persist and regenerate
+    the employee profile. Otherwise return threshold_passed=False so the
+    frontend can prompt for a better answer.
     """
-    file_path = get_employee_file(payload.employee_email)
+    # Score the answer
+    nlp_result = nlp_score(payload.answer, payload.topic)
+    llm_result = llm_score(payload.topic, payload.question, payload.answer)
+    scoring = combine_scores(nlp_result, llm_result)
 
+    # ── Threshold gate ─────────────────────────────────────────────────────────
+    if not nlp_result.get("threshold_passed", True):
+        return {
+            "message": "Answer did not meet the quality threshold. Please provide a more detailed response.",
+            "topic": payload.topic,
+            "final_score": scoring["final_score"],
+            "feedback": llm_result.get("feedback", ""),
+            "threshold_passed": False,
+            "min_score_required": SCORE_THRESHOLD,
+        }
+
+    # ── Persist ────────────────────────────────────────────────────────────────
+    file_path = get_employee_file(payload.employee_email)
     if file_path.exists():
         data: dict = json.loads(file_path.read_text(encoding="utf-8"))
     else:
@@ -204,11 +197,6 @@ def save_topic_response(
             "role": payload.role,
             "responses": [],
         }
-
-    # Score the answer
-    nlp_result = nlp_score(payload.answer, payload.topic)
-    llm_result = llm_score(payload.topic, payload.question, payload.answer)
-    scoring = combine_scores(nlp_result, llm_result)
 
     data["responses"].append(
         {
@@ -222,13 +210,180 @@ def save_topic_response(
     file_path.write_text(
         json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
     )
-    
+
+    # ── Regenerate profile ─────────────────────────────────────────────────────
+    profile = _regenerate_and_save_profile(data)
+
     return {
         "message": "Response saved & evaluated",
         "topic": payload.topic,
         "final_score": scoring["final_score"],
-        "feedback": llm_result["feedback"],
+        "feedback": llm_result.get("feedback", ""),
+        "threshold_passed": True,
+        "profile_snapshot": {
+            "overall_score": profile["overall_score"],
+            "readiness": profile["readiness"],
+            "extracted_skills": profile.get("extracted_skills", []),
+        },
     }
+
+
+@app.post(
+    "/employee/finalize-profile",
+    summary="Explicitly regenerate and store the employee profile",
+    tags=["Chatbot"],
+)
+def finalize_profile(
+    payload: dict,
+    current: TokenData = Depends(get_current_user),
+) -> dict:
+    """
+    Called when the employee has completed all chatbot topics.
+    Regenerates the full profile and returns it.
+    """
+    employee_id = payload.get("employee_id", current.employee_id)
+
+    # Gate: employees can only finalize their own profile
+    if current.role == "EMPLOYEE" and current.employee_id != employee_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+    # Find the response file by scanning for matching employee_id
+    base_emp = _get_base_employee(employee_id)
+    if not base_emp:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
+
+    email = base_emp["email"]
+    file_path = get_employee_file(email)
+    if not file_path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No chatbot responses found")
+
+    data = json.loads(file_path.read_text(encoding="utf-8"))
+    profile = _regenerate_and_save_profile(data)
+
+    return {"message": "Profile finalized", "profile": profile}
+
+
+@app.get(
+    "/employee/progress/{employee_id}",
+    summary="Get chatbot resume state — completed topics, next topic, next question index",
+    tags=["Chatbot"],
+)
+def get_employee_progress(
+    employee_id: str,
+    current: TokenData = Depends(get_current_user),
+) -> dict:
+    """
+    Returns a structured resume payload so the frontend can pick up exactly
+    where the employee left off without re-asking answered questions.
+
+    Response shape
+    ──────────────
+    {
+      "has_progress": bool,
+      "completed_topics": ["Role", "Skills", ...],
+      "answered_questions": {
+          "Role":   ["Q text 1", "Q text 2"],
+          "Skills": ["Q text 1"],
+          ...
+      },
+      "conversation_history": [
+          {"topic": "Role", "question": "...", "answer": "...", "score": {...}},
+          ...
+      ],
+      "profile_snapshot": { overall_score, readiness, extracted_skills } | null
+    }
+    """
+    if current.role == "EMPLOYEE" and current.employee_id != employee_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+    base_emp = _get_base_employee(employee_id)
+    if not base_emp:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
+
+    file_path = get_employee_file(base_emp["email"])
+    if not file_path.exists():
+        return {
+            "has_progress": False,
+            "completed_topics": [],
+            "answered_questions": {},
+            "conversation_history": [],
+            "profile_snapshot": None,
+        }
+
+    data = json.loads(file_path.read_text(encoding="utf-8"))
+    responses: list[dict] = data.get("responses", [])
+
+    # Build per-topic answered question sets (using question text as key)
+    answered_questions: dict[str, list[str]] = {}
+    for r in responses:
+        topic = r.get("topic", "")
+        q = r.get("question", "")
+        answered_questions.setdefault(topic, [])
+        if q not in answered_questions[topic]:
+            answered_questions[topic].append(q)
+
+    # Load profile snapshot if available
+    profile_snapshot = None
+    profile_file = get_profile_file(employee_id)
+    if profile_file.exists():
+        try:
+            p = json.loads(profile_file.read_text(encoding="utf-8"))
+            profile_snapshot = {
+                "overall_score": p.get("overall_score", 0),
+                "readiness": p.get("readiness", "Needs Development"),
+                "extracted_skills": p.get("extracted_skills", []),
+            }
+        except Exception:
+            pass
+
+    return {
+        "has_progress": len(responses) > 0,
+        "completed_topics": list(answered_questions.keys()),
+        "answered_questions": answered_questions,
+        "conversation_history": responses,
+        "profile_snapshot": profile_snapshot,
+    }
+
+
+@app.get(
+    "/employee/profile/{employee_id}",
+    summary="Get the generated profile for an employee",
+    tags=["Chatbot"],
+)
+def get_employee_profile(
+    employee_id: str,
+    current: TokenData = Depends(get_current_user),
+) -> dict:
+    """
+    Return the stored EmployeeProfile JSON.
+    EMPLOYEE may only access their own; HR/ADMIN can access any.
+    """
+    if current.role == "EMPLOYEE" and current.employee_id != employee_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+    profile_file = get_profile_file(employee_id)
+    if not profile_file.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
+
+    return json.loads(profile_file.read_text(encoding="utf-8"))
+
+
+@app.get(
+    "/hr/employee-profiles",
+    summary="List all generated employee profiles (HR / ADMIN)",
+    tags=["HR"],
+)
+def list_employee_profiles(
+    _current: TokenData = Depends(require_roles("HR", "ADMIN")),
+) -> list[dict]:
+    """Return all profiles from  data/profiles/"""
+    profiles = []
+    for f in sorted(_PROFILE_DIR.glob("*.json")):
+        try:
+            profiles.append(json.loads(f.read_text(encoding="utf-8")))
+        except Exception:
+            pass
+    return profiles
 
 
 @app.get(
@@ -240,7 +395,6 @@ def get_employee_data(
     email: str,
     _current: TokenData = Depends(require_roles("HR", "ADMIN")),
 ) -> dict:
-    """Return all stored chatbot responses for the employee with the given email."""
     file_path = get_employee_file(email)
     if not file_path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee responses not found")
@@ -260,7 +414,6 @@ def get_employee_data(
 def get_projects(
     _current: TokenData = Depends(require_roles("HR", "ADMIN")),
 ) -> list[dict]:
-    """Return a lightweight summary list of all projects."""
     projects: list[dict] = read_json("projectDetails.json")
     return [
         {
@@ -277,14 +430,13 @@ def get_projects(
 
 
 @app.get(
-    "/projectsDescrition",           # original typo preserved for frontend compatibility
+    "/projectsDescrition",
     summary="List all projects with full details",
     tags=["Projects"],
 )
 def get_projects_description(
     _current: TokenData = Depends(require_roles("HR", "ADMIN", "EMPLOYEE")),
 ) -> list[dict]:
-    """Return full project objects for all projects."""
     return read_json("projectDetails.json")
 
 
@@ -297,7 +449,6 @@ def get_project(
     project_id: str,
     _current: TokenData = Depends(require_roles("HR", "ADMIN", "EMPLOYEE")),
 ) -> dict:
-    """Return the complete project record for *project_id*."""
     projects: list[dict] = read_json("projectDetails.json")
     project = next((p for p in projects if p["project_id"] == project_id), None)
     if not project:
@@ -315,7 +466,6 @@ def add_project(
     project: ProjectCreate,
     _current: TokenData = Depends(require_roles("HR", "ADMIN")),
 ) -> dict:
-    """Add a new project to the database. Returns the generated project_id."""
     project_id = str(uuid.uuid4())
     new_project = ProjectDescription(project_id=project_id, **project.model_dump())
     append_json("projectDetails.json", jsonable_encoder(new_project.model_dump()))
@@ -336,7 +486,6 @@ def add_project(
 def get_employees(
     _current: TokenData = Depends(require_roles("HR", "ADMIN")),
 ) -> list[dict]:
-    """Return all employee records (password excluded)."""
     employees: list[dict] = read_json("employees.json")
     return [_employee_to_public(e) for e in employees]
 
@@ -351,19 +500,11 @@ def get_employee_by_id(
     employee_id: str,
     current_user: TokenData = Depends(get_current_user),
 ) -> dict:
-    """
-    Return one employee record.
-
-    - HR / ADMIN: can fetch any employee.
-    - EMPLOYEE: can only fetch their own record.
-    """
-    # Role gate
     if current_user.role == "EMPLOYEE" and current_user.employee_id != employee_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Employees may only view their own record",
         )
-
     employees: list[dict] = read_json("employees.json")
     emp = next((e for e in employees if e["employee_id"] == employee_id), None)
     if not emp:
@@ -380,22 +521,21 @@ def get_employee_chat_data(
     employee_id: str,
     current_user: TokenData = Depends(get_current_user),
 ) -> dict:
-    """
-    Return stored chatbot responses for a specific employee_id.
-
-    - HR / ADMIN: can fetch any employee's data.
-    - EMPLOYEE: can only fetch their own chatbot data.
-    """
     if current_user.role == "EMPLOYEE" and current_user.employee_id != employee_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Employees may only view their own chatbot data",
         )
+    # Look up email from employees.json to find the correct response file
+    base_emp = _get_base_employee(employee_id)
+    if base_emp:
+        file_path = get_employee_file(base_emp["email"])
+    else:
+        file_path = _RESPONSE_DIR / f"{employee_id}.json"
 
-    file_path = _RESPONSE_DIR / f"{employee_id}.json"
     if not file_path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat data not found")
-    return read_json(file_path)
+    return json.loads(file_path.read_text(encoding="utf-8"))
 
 
 @app.post(
@@ -409,18 +549,12 @@ def add_employee(
     employee: dict,
     _current: TokenData = Depends(require_roles("ADMIN")),
 ) -> dict:
-    """
-    Add a raw employee dict.
-    For a typed, password-hashing version use POST /auth/register instead.
-    """
     employees: list[dict] = read_json("employees.json")
-
     if any(e["employee_id"] == employee.get("employee_id") for e in employees):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Employee ID already exists",
         )
-
     employees.append(employee)
     write_json("employees.json", employees)
     logger.info("Employee added via /employees: %s", employee.get("employee_id"))
@@ -441,10 +575,6 @@ def suggest_employees(
     project_id: str,
     _current: TokenData = Depends(require_roles("HR", "ADMIN")),
 ) -> list[SuggestedEmployee]:
-    """
-    Run the skill + experience matching algorithm against all employees and
-    return them ranked by match_percentage descending.
-    """
     projects: list[dict] = read_json("projectDetails.json")
     project = next((p for p in projects if p["project_id"] == project_id), None)
     if not project:

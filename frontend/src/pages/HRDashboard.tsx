@@ -1,26 +1,37 @@
-import { FolderPlus, FolderOpen, Users, UserCheck } from "lucide-react";
+import { FolderPlus, FolderOpen, Users, UserCheck, Brain } from "lucide-react";
 import { DashboardCard } from "@/components/DashboardCard";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { useProjects, useEmployees } from "@/api/hooks";
+import { useProjects, useEmployees, useAllProfiles } from "@/api/hooks";
 import { Card, CardContent } from "@/components/ui/card";
 
 const actions = [
   { title: "Add Project", description: "Create a new project and assign team members", icon: FolderPlus, route: "/hr/add-project" },
   { title: "View Projects", description: "Browse and manage all active projects", icon: FolderOpen, route: "/hr/projects" },
   { title: "View Employees", description: "Access employee directory and details", icon: Users, route: "/hr/employees" },
+  { title: "Employee Profiles", description: "View AI-assessed profiles and readiness scores", icon: Brain, route: "/hr/profiles" },
 ];
 
 export default function HRDashboard() {
   const navigate = useNavigate();
   const { data: projects = [] } = useProjects();
   const { data: employees = [] } = useEmployees();
+  const { data: profiles = [] } = useAllProfiles();
+
+  const highReadiness = profiles.filter((p) => p.readiness === "High").length;
+  const avgScore = profiles.length
+    ? (profiles.reduce((s, p) => s + p.overall_score, 0) / profiles.length).toFixed(1)
+    : "—";
 
   const stats = [
     { label: "Total Projects", value: projects.length },
     { label: "Open Projects", value: projects.filter((p) => p.current_status?.toLowerCase() === "open").length },
     { label: "Total Employees", value: employees.length },
     { label: "On Bench", value: employees.filter((e) => e.status === "Bench").length },
+    { label: "Profiles Generated", value: profiles.length },
+    { label: "High Readiness", value: highReadiness },
+    { label: "Avg Assessment Score", value: avgScore },
+    { label: "Allocated", value: employees.filter((e) => e.status === "Allocated").length },
   ];
 
   return (
@@ -48,7 +59,7 @@ export default function HRDashboard() {
           </div>
 
           {/* Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {actions.map((item) => (
               <DashboardCard
                 key={item.route}

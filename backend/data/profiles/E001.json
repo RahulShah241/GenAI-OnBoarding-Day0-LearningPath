@@ -1,0 +1,59 @@
+{
+  "employee_id": "E001",
+  "email": "rahul@company.com",
+  "name": "Rahul Shah",
+  "current_role_summary": "I work as a software developer. My day-to-day responsibilities include developing new features, fixing bugs, reviewing code, and working with my team to deliver updates on time.",
+  "desired_role_summary": "I would like to work in a backend-focused role where I can design APIs, work with databases, and contribute to scalable system architecture.",
+  "experience_summary": "So far, I have worked on both internal tools and client-facing applications, which helped me understand the full development lifecycle from requirement gathering to deployment.",
+  "years_of_experience": 2,
+  "extracted_skills": [
+    "Python",
+    "Java",
+    "FastAPI",
+    "SQL",
+    "REST API",
+    "Git"
+  ],
+  "merged_skills": [
+    "React",
+    "Node.js",
+    "GenAI",
+    "REST API",
+    "Git",
+    "Python",
+    "Java",
+    "FastAPI",
+    "SQL"
+  ],
+  "soft_skills": {
+    "communication": 3.58,
+    "collaboration": 4.03,
+    "problem_solving": 4.89,
+    "ownership": 3.48
+  },
+  "learning_interests": [
+    "I want to improve my system design skills and learn more about cloud-native and AI-driven applications.",
+    "I learn by reading documentation, watching tutorials, practicing with small tasks, and taking help from teammates when required.",
+    "I want to improve my system design skills and learn more about cloud-native and AI-driven applications."
+  ],
+  "workstyle": {
+    "preferred_work_style": "I prefer working in a structured environment with clear goals, but I also like having flexibility to explore better solutions.",
+    "motivations": "I prefer working in a structured environment with clear goals, but I also like having flexibility to explore better solutions."
+  },
+  "overall_score": 4.1,
+  "readiness": "Moderate",
+  "profile_version": 1,
+  "completed_topics": [
+    "Role",
+    "Skills",
+    "Experience",
+    "Communication",
+    "Ownership",
+    "Collaboration",
+    "Problem-Solving",
+    "Learning",
+    "Workstyle",
+    "Validation"
+  ],
+  "submitted_at": "2026-03-11T16:16:06.977050+00:00"
+}

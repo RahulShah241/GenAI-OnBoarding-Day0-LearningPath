@@ -2,15 +2,13 @@
 schemas.py
 ──────────
 All Pydantic models for request validation and response serialisation.
-
-Original fields are fully preserved. Auth-related models are added at the
-bottom without touching any existing model.
+Enhanced with EmployeeProfile for full chatbot-derived profile storage.
 """
 
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -102,21 +100,15 @@ class ProjectSummary(BaseModel):
 # ══════════════════════════════════════════════════════════════════════════════
 
 class Employee(BaseModel):
-    """
-    Core employee model.
-    password is excluded from all API responses via response_model or
-    the exclude_password() helper on EmployeePublic.
-    """
     employee_id: str
     name: str
     email: str
-    role: str                          # "EMPLOYEE" | "HR" | "ADMIN"
+    role: str
     skills: List[str]
     experience: float
     status: str
     designation: Optional[str] = None
     department: Optional[str] = None
-    # password stored hashed in employees.json — never returned in responses
     password: Optional[str] = None
 
 
@@ -141,6 +133,57 @@ class SuggestedEmployee(EmployeePublic):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# EMPLOYEE PROFILE  (generated from chatbot responses)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class SoftSkillScores(BaseModel):
+    communication: Optional[float] = None
+    collaboration: Optional[float] = None
+    problem_solving: Optional[float] = None
+    ownership: Optional[float] = None
+
+
+class WorkstyleProfile(BaseModel):
+    preferred_work_style: Optional[str] = None
+    motivations: Optional[str] = None
+
+
+class EmployeeProfile(BaseModel):
+    """
+    Rich profile derived from chatbot responses.
+    Stored as  data/profiles/{employee_id}.json
+    """
+    employee_id: str
+    email: str
+    name: Optional[str] = None
+
+    # Role & experience summary
+    current_role_summary: Optional[str] = None
+    desired_role_summary: Optional[str] = None
+    experience_summary: Optional[str] = None
+    years_of_experience: Optional[float] = None
+
+    # Skills extracted from NLP (merged with base employee skills)
+    extracted_skills: List[str] = Field(default_factory=list)
+
+    # Soft skills scored 0–5
+    soft_skills: SoftSkillScores = Field(default_factory=SoftSkillScores)
+
+    # Learning & workstyle
+    learning_interests: List[str] = Field(default_factory=list)
+    workstyle: WorkstyleProfile = Field(default_factory=WorkstyleProfile)
+
+    # Assessment quality
+    overall_score: float = 0.0
+    readiness: str = "Needs Development"   # High | Moderate | Needs Development
+
+    # Metadata
+    profile_version: int = 1
+    completed_topics: List[str] = Field(default_factory=list)
+    submitted_at: Optional[str] = None
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # CHATBOT / SCORING
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -148,6 +191,7 @@ class NLPScore(BaseModel):
     word_count: int
     keyword_hits: int
     nlp_score: float
+    threshold_passed: bool = True
 
 
 class LLMScore(BaseModel):
@@ -161,6 +205,7 @@ class Score(BaseModel):
     final_score: float
     nlp: NLPScore
     llm: LLMScore
+    threshold_passed: bool = True
 
 
 class ResponseItem(BaseModel):
@@ -171,9 +216,11 @@ class ResponseItem(BaseModel):
 
 
 class EmployeeResponse(BaseModel):
+    employee_id: str
     employee_email: EmailStr
     role: Literal["EMPLOYEE", "HR", "ADMIN"]
     responses: List[ResponseItem] = Field(default_factory=list)
+    profile: Optional[Dict[str, Any]] = None  # latest generated profile snapshot
 
 
 class TopicResponseCreate(BaseModel):
@@ -187,49 +234,32 @@ class TopicResponseCreate(BaseModel):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# AUTHENTICATION  (new)
+# AUTHENTICATION
 # ══════════════════════════════════════════════════════════════════════════════
 
 class LoginRequest(BaseModel):
-    """Body for POST /auth/login"""
     email: EmailStr
     password: str
 
 
 class TokenResponse(BaseModel):
-    """
-    Returned by POST /auth/login and POST /auth/refresh.
-    access_token  — short-lived JWT (Bearer) sent with every API call.
-    token_type    — always "bearer".
-    employee      — public profile of the authenticated user (no password).
-    """
     access_token: str
     token_type: str = "bearer"
     employee: EmployeePublic
 
 
 class TokenData(BaseModel):
-    """
-    Claims embedded inside the JWT payload.
-    employee_id and role are used by get_current_user() for fast lookups.
-    """
     employee_id: str
     email: str
     role: str
 
 
 class ChangePasswordRequest(BaseModel):
-    """Body for POST /auth/change-password"""
     current_password: str
     new_password: str
 
 
 class RegisterRequest(BaseModel):
-    """
-    Body for POST /auth/register (ADMIN only).
-    All fields mirror the Employee model; password is plain-text here
-    and hashed before storage.
-    """
     employee_id: str
     name: str
     email: EmailStr
