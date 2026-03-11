@@ -1,0 +1,138 @@
+[
+    {
+        "employee_id": "E001",
+        "name": "Rahul Shah",
+        "email": "rahul@company.com",
+        "role": "EMPLOYEE",
+        "skills": [
+            "React",
+            "Node.js",
+            "GenAI",
+            "REST API",
+            "Git",
+            "Python",
+            "Java",
+            "FastAPI",
+            "SQL"
+        ],
+        "experience": 2,
+        "status": "Bench",
+        "designation": "Full Stack Developer",
+        "department": "Engineering",
+        "password": "$2b$12$yyvuREXeWgRdSqPDOA/IdO4pANMXSZC5pGlokr54/jUVqocQsuyv."
+    },
+    {
+        "employee_id": "E002",
+        "name": "Anita Verma",
+        "email": "anita@company.com",
+        "role": "EMPLOYEE",
+        "skills": [
+            "Java",
+            "Spring Boot",
+            "AWS"
+        ],
+        "experience": 4,
+        "status": "Allocated",
+        "designation": "Backend Developer",
+        "department": "Engineering",
+        "password": "e002123"
+    },
+    {
+        "employee_id": "E003",
+        "name": "Priya Nair",
+        "email": "priya@company.com",
+        "role": "EMPLOYEE",
+        "skills": [
+            "Python",
+            "FastAPI",
+            "GenAI / RAG",
+            "SQL"
+        ],
+        "experience": 3,
+        "status": "Bench",
+        "designation": "AI/ML Engineer",
+        "department": "Data Science",
+        "password": "e003123"
+    },
+    {
+        "employee_id": "E004",
+        "name": "Vikram Joshi",
+        "email": "vikram@company.com",
+        "role": "EMPLOYEE",
+        "skills": [
+            "React",
+            "AWS",
+            "Docker",
+            "Node.js"
+        ],
+        "experience": 5,
+        "status": "Bench",
+        "designation": "DevOps Engineer",
+        "department": "Infrastructure",
+        "password": "e004123"
+    },
+    {
+        "employee_id": "E005",
+        "name": "Sneha Patil",
+        "email": "sneha@company.com",
+        "role": "EMPLOYEE",
+        "skills": [
+            "Python",
+            "SQL",
+            "Power BI",
+            "React"
+        ],
+        "experience": 3,
+        "status": "Bench",
+        "designation": "Data Engineer",
+        "department": "Analytics",
+        "password": "e005123"
+    },
+    {
+        "employee_id": "E006",
+        "name": "Arjun Mehta",
+        "email": "arjun@company.com",
+        "role": "EMPLOYEE",
+        "skills": [
+            "Java",
+            "Spring Boot",
+            "Stripe API",
+            "AWS"
+        ],
+        "experience": 6,
+        "status": "Allocated",
+        "designation": "Senior Backend Developer",
+        "department": "Engineering",
+        "password": "e006123"
+    },
+    {
+        "employee_id": "HR001",
+        "name": "HR Manager",
+        "email": "hr@company.com",
+        "role": "HR",
+        "skills": [
+            "Recruiting",
+            "HR Management"
+        ],
+        "experience": 5.0,
+        "status": "Active",
+        "designation": "HR Manager",
+        "department": "Human Resources",
+        "password": "$2b$12$dgZy8yWTZ3V2Lc7sgjtPYuUycW1YowY5420ms/y3GJsNcZ.8w1F0u"
+    },
+    {
+        "employee_id": "ADMIN001",
+        "name": "Admin User",
+        "email": "admin@company.com",
+        "role": "ADMIN",
+        "skills": [
+            "Administration",
+            "Management"
+        ],
+        "experience": 8.0,
+        "status": "Active",
+        "designation": "System Administrator",
+        "department": "IT",
+        "password": "admin123"
+    }
+]
