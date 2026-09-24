@@ -48,6 +48,7 @@ from schemas import (
     TokenData,
     TopicResponseCreate,
 )
+from database import init_db
 from services.llm_scoring import llm_score
 from services.nlp_scoring import nlp_score, SCORE_THRESHOLD
 from services.scoring_engine import combine_scores
@@ -68,6 +69,10 @@ app = FastAPI(
     ),
     version="3.0.0",
 )
+
+@app.on_event("startup")
+def on_startup():
+    init_db()
 
 origins = os.getenv(
     "ALLOWED_ORIGINS",

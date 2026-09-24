@@ -17,7 +17,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from auth.dependencies import get_current_user, require_roles
 from auth.security import create_access_token, hash_password, verify_password
-from json_db import read_json, write_json
+from database import (
+    get_all_employees,
+    get_employee_by_email,
+    get_employee_by_id,
+    save_employee,
+)
 from schemas import (
     ChangePasswordRequest,
     EmployeePublic,
@@ -35,13 +40,11 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 def _find_employee_by_email(email: str) -> dict | None:
     """Return the raw employee dict whose email matches, or None."""
-    employees: list[dict] = read_json("employees.json")
-    return next((e for e in employees if e["email"].lower() == email.lower()), None)
+    return get_employee_by_email(email)
 
 
 def _find_employee_by_id(employee_id: str) -> dict | None:
-    employees: list[dict] = read_json("employees.json")
-    return next((e for e in employees if e["employee_id"] == employee_id), None)
+    return get_employee_by_id(employee_id)
 
 
 def _to_public(emp: dict) -> EmployeePublic:
@@ -106,12 +109,8 @@ def login(payload: LoginRequest) -> TokenResponse:
 
     # Transparently upgrade plain-text passwords to bcrypt
     if needs_upgrade:
-        employees: list[dict] = read_json("employees.json")
-        for e in employees:
-            if e["employee_id"] == emp["employee_id"]:
-                e["password"] = hash_password(payload.password)
-                break
-        write_json("employees.json", employees)
+        emp["password"] = hash_password(payload.password)
+        save_employee(emp)
         logger.info("Upgraded password hash for employee %s", emp["employee_id"])
 
     token = create_access_token(
@@ -151,15 +150,10 @@ def change_password(
     Change the password for the currently authenticated employee.
     Requires the correct current password for verification.
     """
-    employees: list[dict] = read_json("employees.json")
-    idx = next(
-        (i for i, e in enumerate(employees) if e["employee_id"] == current_user.employee_id),
-        None,
-    )
-    if idx is None:
+    emp = _find_employee_by_id(current_user.employee_id)
+    if emp is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    emp = employees[idx]
     stored = emp.get("password", "")
 
     # Verify current password (supports both bcrypt and legacy plain-text)
@@ -174,8 +168,8 @@ def change_password(
             detail="Current password is incorrect",
         )
 
-    employees[idx]["password"] = hash_password(payload.new_password)
-    write_json("employees.json", employees)
+    emp["password"] = hash_password(payload.new_password)
+    save_employee(emp)
     return {"message": "Password changed successfully"}
 
 
@@ -194,15 +188,12 @@ def register(
     Only ADMINs may call this endpoint.
     Password is stored as a bcrypt hash.
     """
-    employees: list[dict] = read_json("employees.json")
-
-    # Duplicate checks
-    if any(e["employee_id"] == payload.employee_id for e in employees):
+    if _find_employee_by_id(payload.employee_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Employee ID '{payload.employee_id}' already exists",
         )
-    if any(e["email"].lower() == payload.email.lower() for e in employees):
+    if _find_employee_by_email(payload.email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Email '{payload.email}' is already registered",
@@ -221,8 +212,7 @@ def register(
         "password": hash_password(payload.password),
     }
 
-    employees.append(new_emp)
-    write_json("employees.json", employees)
+    save_employee(new_emp)
     logger.info("Registered new employee: %s (%s)", payload.employee_id, payload.email)
 
     return _to_public(new_emp)
