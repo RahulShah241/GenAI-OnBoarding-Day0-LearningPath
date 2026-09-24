@@ -1,21 +1,38 @@
 # TalentForge AI - Employee–Project Matching Platform
 
-## 🚀 One-Command Setup & Launch
+## 🐳 Running with Docker (Recommended)
 
-To bring up both the **FastAPI Backend (Port 8000)** and **Vite Frontend (Port 8080)** together with automatic SQLite database initialization:
+To build and launch the complete stack (**FastAPI Backend + SQLite DB + React Frontend**) using Docker:
+
+```bash
+docker compose up --build
+```
+
+- **Frontend UI**: [http://localhost:8080](http://localhost:8080)
+- **Backend API**: [http://localhost:8000](http://localhost:8000)
+
+To stop the containers:
+```bash
+docker compose down
+```
+
+---
+
+## 🚀 Native One-Command Setup
+
+If running locally without Docker:
 
 ```bash
 python start.py
 ```
 
-### Windows Users
-You can also run either of the helper scripts in the root directory:
+### Windows Launchers:
 - **Batch**: `start.bat` (or double-click `start.bat`)
 - **PowerShell**: `.\start.ps1`
 
 ---
 
-## 🛠 Manual Setup (Optional)
+## 🛠 Manual Setup
 
 ### Backend (FastAPI + SQLite)
 ```bash
