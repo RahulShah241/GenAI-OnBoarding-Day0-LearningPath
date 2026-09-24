@@ -696,6 +696,69 @@
           "feedback": "This demonstrates a good understanding of validation and an opportunity to expand on specific examples."
         }
       }
+    },
+    {
+      "topic": "Skills",
+      "question": "How would you describe your current technical and functional skills in your own words?",
+      "answer": "I have good experience in backend development using Python and Java. I am comfortable building REST APIs, working with relational databases, and have basic knowledge of frontend technologies like HTML and CSS.",
+      "score": {
+        "final_score": 4.33,
+        "threshold_passed": true,
+        "nlp": {
+          "word_count": 32,
+          "keyword_hits": 7,
+          "nlp_score": 5.0,
+          "threshold_passed": true
+        },
+        "llm": {
+          "relevance": 4,
+          "depth": 3,
+          "clarity": 4,
+          "feedback": "Consider providing more specific examples of your skills and experiences to demonstrate their practical application."
+        }
+      }
+    },
+    {
+      "topic": "Skills",
+      "question": "Which skills or technologies do you use most frequently in your daily work?",
+      "answer": "AI ,pytorch,ML",
+      "score": {
+        "final_score": 3.7,
+        "threshold_passed": true,
+        "nlp": {
+          "word_count": 2,
+          "keyword_hits": 3,
+          "nlp_score": 3.4,
+          "threshold_passed": true
+        },
+        "llm": {
+          "relevance": 4,
+          "depth": 3,
+          "clarity": 5,
+          "feedback": "This answer shows a good understanding of the topic, but could benefit from providing more context about how these skills are applied in a practical scenario."
+        }
+      }
+    },
+    {
+      "topic": "Skills",
+      "question": "Are there any tools, technologies, or working methodologies that you feel confident using?",
+      "answer": "Agile,RESTAPI ,git",
+      "score": {
+        "final_score": 3.7,
+        "threshold_passed": true,
+        "nlp": {
+          "word_count": 2,
+          "keyword_hits": 3,
+          "nlp_score": 3.4,
+          "threshold_passed": true
+        },
+        "llm": {
+          "relevance": 4,
+          "depth": 3,
+          "clarity": 5,
+          "feedback": "The employee demonstrated a good understanding of modern software development methodologies and tools, but could elaborate further on how they apply to the role."
+        }
+      }
     }
   ]
 }

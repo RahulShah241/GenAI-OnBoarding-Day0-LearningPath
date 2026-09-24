@@ -13,7 +13,10 @@
             "Python",
             "Java",
             "FastAPI",
-            "SQL"
+            "SQL",
+            "ML",
+            "AI",
+            "PyTorch"
         ],
         "experience": 2,
         "status": "Bench",

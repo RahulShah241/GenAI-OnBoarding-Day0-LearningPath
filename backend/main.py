@@ -23,10 +23,10 @@ import logging
 import re
 import uuid
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status, Query
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 import os
@@ -52,6 +52,7 @@ from services.llm_scoring import llm_score
 from services.nlp_scoring import nlp_score, SCORE_THRESHOLD
 from services.scoring_engine import combine_scores
 from services.profile_generator import generate_profile
+from services.course_recommender import get_course_recommendations
 
 logging.basicConfig(
     level=logging.INFO,
@@ -457,6 +458,25 @@ def get_project(
     return project
 
 
+@app.get(
+    "/projects/{project_id}/recommended-courses",
+    summary="Get LLM recommended skill courses for a project",
+    tags=["Projects"],
+)
+def get_project_recommended_courses(
+    project_id: str,
+    _current: TokenData = Depends(require_roles("HR", "ADMIN", "EMPLOYEE")),
+) -> dict:
+    projects: list[dict] = read_json("projectDetails.json")
+    project = next((p for p in projects if p["project_id"] == project_id), None)
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
+    skills = [s["skill_name"] for s in project.get("required_skills", []) if s.get("skill_name")]
+    courses = get_course_recommendations(skills)
+    return {"project_id": project_id, "skills": skills, "recommended_courses": courses}
+
+
 @app.post(
     "/project",
     status_code=status.HTTP_201_CREATED,
@@ -649,3 +669,56 @@ def suggest_employees(
     suggestions = [calculate_match(project, emp) for emp in employees]
     suggestions.sort(key=lambda x: x.match_percentage, reverse=True)
     return suggestions
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# LLM SKILL GAP COURSE RECOMMENDATIONS
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get(
+    "/projects/{project_id}/recommended-courses",
+    summary="Get LLM course recommendations for skill match gap",
+    tags=["Matching"],
+)
+def get_recommended_courses(
+    project_id: str,
+    missing_skills: Optional[str] = Query(None, description="Comma-separated list of missing skills gap"),
+    current: TokenData = Depends(get_current_user),
+) -> dict:
+    projects: list[dict] = read_json("projectDetails.json")
+    project = next((p for p in projects if p.get("project_id") == project_id), None)
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
+    gap_skills: list[str] = []
+
+    if missing_skills is not None:
+        gap_skills = [s.strip() for s in missing_skills.split(",") if s.strip()]
+    else:
+        emp_skills: list[str] = getattr(current, "skills", []) or []
+        profile_path = DATA_DIR / "profiles" / f"{current.employee_id}.json"
+        if profile_path.exists():
+            try:
+                pdata = json.loads(profile_path.read_text(encoding="utf-8"))
+                emp_skills = pdata.get("merged_skills", emp_skills)
+            except Exception:
+                pass
+
+        req_skills = [s.get("skill_name", "") for s in project.get("required_skills", []) if s.get("skill_name")]
+        for req in req_skills:
+            matched = any(
+                emp_s.lower() in req.lower() or req.lower() in emp_s.lower()
+                for emp_s in emp_skills
+            )
+            if not matched:
+                gap_skills.append(req)
+
+    from services.course_recommender import get_course_recommendations
+    courses = get_course_recommendations(gap_skills)
+
+    return {
+        "project_id": project_id,
+        "gap_skills": gap_skills,
+        "recommended_courses": courses,
+    }
+

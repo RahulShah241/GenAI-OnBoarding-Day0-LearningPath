@@ -205,3 +205,40 @@ export function useUpdateUser() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
   });
 }
+
+// ─── Project Recommended Courses (LLM) ────────────────────────────────────────
+
+export interface RecommendedCourse {
+  skill: string;
+  course_title: string;
+  url: string;
+  platform: string;
+}
+
+export function useProjectRecommendedCourses(
+  projectId: string | undefined,
+  missingSkills?: string[]
+) {
+  const queryStr =
+    missingSkills && missingSkills.length > 0
+      ? `?missing_skills=${encodeURIComponent(missingSkills.join(","))}`
+      : "";
+
+  return useQuery<{
+    project_id: string;
+    gap_skills: string[];
+    recommended_courses: RecommendedCourse[];
+  }>({
+    queryKey: ["project-courses", projectId, missingSkills?.join(",")],
+    queryFn: () =>
+      authFetch(`${BASE}/projects/${projectId}/recommended-courses${queryStr}`).then((r) =>
+        checked<{
+          project_id: string;
+          gap_skills: string[];
+          recommended_courses: RecommendedCourse[];
+        }>(r)
+      ),
+    enabled: !!projectId && (missingSkills === undefined || missingSkills.length > 0),
+    staleTime: 5 * 60 * 1000,
+  });
+}

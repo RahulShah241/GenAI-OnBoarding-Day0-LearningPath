@@ -154,26 +154,20 @@ export default function EmployeeChatbot() {
   const startTopicAt = useCallback(
     (topic: string, qIdx: number) => {
       setActiveTopic(topic);
-      setQuestionIndex(qIdx);
+      const qs = (Chat_bot_questions as any)[topic];
+      const validQIdx = qIdx >= 0 && qIdx < qs.length ? qIdx : 0;
+      setQuestionIndex(validQIdx);
       setRetryCount(0);
       setAwaitingConfirm(false);
       setPendingTopic(null);
 
-      const qs = (Chat_bot_questions as any)[topic];
-      const q = qs[qIdx];
+      const q = qs[validQIdx];
 
-      const header: Message =
-        qIdx === 0
-          ? {
-              from: "bot",
-              text: `📌 ${topic}\nPlease share your thoughts for this section.`,
-              type: "info",
-            }
-          : {
-              from: "bot",
-              text: `▶ Continuing "${topic}" — question ${qIdx + 1} of ${qs.length}`,
-              type: "info",
-            };
+      const header: Message = {
+        from: "bot",
+        text: `📌 ${topic} (${validQIdx + 1} of ${qs.length})\nPlease share your response below to add or update details.`,
+        type: "info",
+      };
 
       setMessages((p) => [
         ...p,
@@ -234,24 +228,33 @@ export default function EmployeeChatbot() {
 
         if (!progress.has_progress) { freshStart(); return; }
 
-        // All done → redirect
+        // Rebuild history messages
+        const historyMsgs = buildHistoryMessages(progress.conversation_history, progress.answered_questions);
+
+        // All done → keep user on page so they can review / update side menu topics
         if (fullyDone.size === TOPICS.length) {
-          setMessages([{
-            from: "bot",
-            text: "🎉 You've already completed the full assessment! Redirecting to your matched projects…",
-            type: "success",
-          }]);
+          setMessages([
+            ...historyMsgs,
+            {
+              from: "bot",
+              text: "🎉 You have completed the full assessment! You can click any section from the side menu on the left to review or add more details anytime.",
+              type: "success",
+            },
+          ]);
           setLoading(false);
-          setTimeout(() => navigate("/employee/job-matches"), 1800);
+          startTopicAt(TOPICS[0], 0);
           return;
         }
 
         // Partial — rebuild history then resume
-        setMessages(buildHistoryMessages(progress.conversation_history, progress.answered_questions));
+        setMessages(historyMsgs);
         setLoading(false);
 
         const resume = findResumePoint(progress.answered_questions);
-        if (!resume) { navigate("/employee/job-matches"); return; }
+        if (!resume) {
+          startTopicAt(TOPICS[0], 0);
+          return;
+        }
 
         setTimeout(() => startTopicAt(resume.topic, resume.questionIndex), 400);
       } catch {
@@ -351,14 +354,14 @@ export default function EmployeeChatbot() {
           // All done
           push({
             from: "bot",
-            text: "🎉 All sections completed! Generating your profile…",
+            text: "🎉 All sections completed! Profile and skill evaluation updated.",
             type: "success",
           });
           try {
             const { profile } = await finalizeProfile(user?.employee_id ?? "");
             push({
               from: "bot",
-              text: `✨ Profile ready!\n• Overall Score: ${profile.overall_score} / 5\n• Readiness: ${profile.readiness}\n• Skills: ${profile.extracted_skills.slice(0, 6).join(", ") || "—"}\n\nRedirecting…`,
+              text: `✨ Profile ready!\n• Overall Score: ${profile.overall_score} / 5\n• Readiness: ${profile.readiness}\n• Skills: ${profile.extracted_skills.slice(0, 6).join(", ") || "—"}\n\nYou can click any section from the side menu to update details, or click 'View Matched Projects' above!`,
               type: "success",
             });
             setProfileSnapshot({
@@ -367,10 +370,8 @@ export default function EmployeeChatbot() {
               extracted_skills: profile.extracted_skills,
             });
           } catch {
-            push({ from: "bot", text: "Profile generated. Redirecting…", type: "success" });
+            push({ from: "bot", text: "Profile updated successfully.", type: "success" });
           }
-          setActiveTopic(null);
-          setTimeout(() => navigate("/employee/job-matches"), 2200);
         }
       }
     } catch (err: any) {
@@ -387,8 +388,8 @@ export default function EmployeeChatbot() {
 
   // ── Sidebar topic click ────────────────────────────────────────────────────
   const handleTopicClick = (topic: string) => {
-    if (topic === activeTopic || loading) return;
-    if (activeTopic && !completedTopics.has(activeTopic)) {
+    if (loading) return;
+    if (activeTopic && activeTopic !== topic && !completedTopics.has(activeTopic)) {
       setPendingTopic(topic);
       setAwaitingConfirm(true);
       push({
@@ -399,11 +400,14 @@ export default function EmployeeChatbot() {
       return;
     }
     const aq = answeredQs[topic];
-    const idx = aq
-      ? (Chat_bot_questions as any)[topic].findIndex(
-          (q: { question: string }) => !aq.has(q.question)
-        )
+    const qs = (Chat_bot_questions as any)[topic];
+    let idx = aq
+      ? qs.findIndex((q: { question: string }) => !aq.has(q.question))
       : 0;
+
+    if (idx === -1) {
+      idx = 0;
+    }
     startTopicAt(topic, Math.max(idx, 0));
   };
 
@@ -541,12 +545,24 @@ export default function EmployeeChatbot() {
               {" · "}{user?.name}
             </p>
           </div>
-          {retryCount > 0 && (
-            <div className="flex items-center gap-1.5 text-amber-600 text-xs">
-              <AlertTriangle className="h-4 w-4" />
-              Retry #{retryCount} — please add more detail
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {completedTopics.size > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/employee/job-matches")}
+                className="gap-2 text-xs border-primary/40 text-primary hover:bg-primary/10 font-medium"
+              >
+                View Matched Projects →
+              </Button>
+            )}
+            {retryCount > 0 && (
+              <div className="flex items-center gap-1.5 text-amber-600 text-xs">
+                <AlertTriangle className="h-4 w-4" />
+                Retry #{retryCount} — please add more detail
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Messages */}
@@ -636,18 +652,21 @@ export default function EmployeeChatbot() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={
-                loading ? "Loading your progress…"
-                  : submitting ? "Saving…"
-                  : allDone ? "Assessment complete"
-                  : "Type your response…"
+                loading
+                  ? "Loading your progress…"
+                  : submitting
+                  ? "Saving…"
+                  : activeTopic
+                  ? `Type your response for ${activeTopic}…`
+                  : "Select a section from the side menu…"
               }
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-              disabled={submitting || allDone || loading}
+              disabled={submitting || loading || !activeTopic}
               className="flex-1"
             />
             <Button
               onClick={handleSend}
-              disabled={submitting || !input.trim() || allDone || loading}
+              disabled={submitting || !input.trim() || loading || !activeTopic}
               size="icon"
             >
               {submitting ? (

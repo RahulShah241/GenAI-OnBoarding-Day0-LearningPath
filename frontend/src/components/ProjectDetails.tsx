@@ -7,6 +7,8 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useProjectById } from "@/api/hooks";
 import { Button } from "./ui/button";
 
+import RecommendedCoursesBlock from "./RecommendedCoursesBlock";
+
 interface ProjectDetailsProps {
   project: ProjectDescription;
 }
@@ -114,6 +116,7 @@ console.log(project)
             </Badge>
           ))}
         </div>
+        <RecommendedCoursesBlock projectId={project.project_id} />
       </Section>
 
       {/* Responsibilities */}

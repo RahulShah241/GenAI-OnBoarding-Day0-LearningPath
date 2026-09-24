@@ -11,6 +11,9 @@
     "Java",
     "FastAPI",
     "SQL",
+    "ML",
+    "AI",
+    "PyTorch",
     "REST API",
     "Git"
   ],
@@ -23,7 +26,10 @@
     "Python",
     "Java",
     "FastAPI",
-    "SQL"
+    "SQL",
+    "ML",
+    "AI",
+    "PyTorch"
   ],
   "soft_skills": {
     "communication": 3.58,
@@ -40,7 +46,7 @@
     "preferred_work_style": "I prefer working in a structured environment with clear goals, but I also like having flexibility to explore better solutions.",
     "motivations": "I prefer working in a structured environment with clear goals, but I also like having flexibility to explore better solutions."
   },
-  "overall_score": 4.1,
+  "overall_score": 4.08,
   "readiness": "Moderate",
   "profile_version": 1,
   "completed_topics": [
@@ -55,5 +61,5 @@
     "Workstyle",
     "Validation"
   ],
-  "submitted_at": "2026-03-11T16:16:06.977050+00:00"
+  "submitted_at": "2026-09-24T19:20:50.526799+00:00"
 }

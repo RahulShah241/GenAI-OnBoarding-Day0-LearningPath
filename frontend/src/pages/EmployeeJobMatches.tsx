@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProjectsFull, useEmployeeProfile } from "@/api/hooks";
+import RecommendedCoursesBlock from "@/components/RecommendedCoursesBlock";
 import { Data } from "@/store/Data";
 import { useNavigate } from "react-router-dom";
 import type { ProjectDescription } from "@/types/Project";
@@ -124,6 +125,7 @@ function MatchCard({
             </div>
           </div>
         </div>
+        <RecommendedCoursesBlock projectId={project.project_id} missingSkills={unmatched} />
       </CardContent>
     </Card>
   );
