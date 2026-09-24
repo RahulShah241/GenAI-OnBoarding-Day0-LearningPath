@@ -2,7 +2,7 @@
 auth/security.py
 ────────────────
 JWT helpers (create / decode) and password hashing utilities.
-Uses python-jose for JWT and passlib[bcrypt] for hashing.
+Uses python-jose for JWT and native bcrypt for hashing (avoiding passlib detect_wrap_bug issues).
 """
 
 from __future__ import annotations
@@ -12,8 +12,8 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from schemas import TokenData
 
@@ -29,25 +29,33 @@ ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
     os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "45")
 )
 
-# ── Password hashing ─────────────────────────────────────────────────────────
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def _normalize_password(password: str) -> str:
+# ── Password hashing ─────────────────────────────────────────────────────────
+
+def _get_pwd_bytes(password: str) -> bytes:
     """
-    Bcrypt only supports 72 bytes.
-    Truncate safely to avoid runtime errors.
+    Bcrypt only supports passwords up to 72 bytes.
+    Safely encode to UTF-8 and truncate to 72 bytes.
     """
-    return password.encode("utf-8")[:72].decode("utf-8", "ignore")
+    return password.encode("utf-8")[:72]
 
 
 def hash_password(plain: str) -> str:
-    plain = _normalize_password(plain)
-    return pwd_context.hash(plain)
+    """Hash a plain text password using bcrypt."""
+    pwd_bytes = _get_pwd_bytes(plain)
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    plain = _normalize_password(plain)
-    return pwd_context.verify(plain, hashed)
+    """Verify a plain text password against a bcrypt hash string."""
+    try:
+        pwd_bytes = _get_pwd_bytes(plain)
+        hashed_bytes = hashed.encode("utf-8")
+        return bcrypt.checkpw(pwd_bytes, hashed_bytes)
+    except Exception as exc:
+        logger.warning("Password verification error: %s", exc)
+        return False
 
 
 # ── JWT helpers ──────────────────────────────────────────────────────────────

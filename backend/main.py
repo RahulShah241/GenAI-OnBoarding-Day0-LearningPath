@@ -74,12 +74,22 @@ app = FastAPI(
 def on_startup():
     init_db()
 
-origins = os.getenv(
-    "ALLOWED_ORIGINS",
-    '"http://localhost:8080","https://genai-onboarding-day0-learningpath-1.onrender.com"',
-)
-ALLOWED_ORIGINS: list[str] = [o.strip() for o in origins.split(",") if o.strip()]
-ALLOWED_ORIGINS = origins
+origins_env = os.getenv("ALLOWED_ORIGINS", "*")
+if origins_env.strip() == "*":
+    ALLOWED_ORIGINS = ["*"]
+else:
+    raw_list = origins_env.replace('"', '').replace("'", '').split(",")
+    ALLOWED_ORIGINS = [o.strip() for o in raw_list if o.strip()]
+
+if "*" not in ALLOWED_ORIGINS:
+    for domain in [
+        "http://localhost:8080",
+        "http://localhost:8081",
+        "https://talentforgeai.onrender.com",
+        "https://genai-onboarding-day0-learningpath.onrender.com",
+    ]:
+        if domain not in ALLOWED_ORIGINS:
+            ALLOWED_ORIGINS.append(domain)
 
 app.add_middleware(
     CORSMiddleware,
