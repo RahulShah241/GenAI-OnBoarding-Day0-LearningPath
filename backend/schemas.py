@@ -270,3 +270,16 @@ class RegisterRequest(BaseModel):
     status: str = "Bench"
     designation: Optional[str] = None
     department: Optional[str] = None
+
+
+class EmployeeUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    role: Optional[Literal["EMPLOYEE", "HR", "ADMIN"]] = None
+    skills: Optional[List[str]] = None
+    experience: Optional[float] = None
+    status: Optional[str] = None
+    designation: Optional[str] = None
+    department: Optional[str] = None
+    password: Optional[str] = None
+

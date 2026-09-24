@@ -2,7 +2,7 @@
     {
         "employee_id": "E001",
         "name": "Rahul Shah",
-        "email": "rahul@company.com",
+        "email": "rahul@aionboarding.com",
         "role": "EMPLOYEE",
         "skills": [
             "React",
@@ -24,23 +24,23 @@
     {
         "employee_id": "E002",
         "name": "Anita Verma",
-        "email": "anita@company.com",
-        "role": "EMPLOYEE",
+        "email": "anita@aionboarding.com",
+        "role": "HR",
         "skills": [
             "Java",
             "Spring Boot",
             "AWS"
         ],
-        "experience": 4,
-        "status": "Allocated",
+        "experience": 4.0,
+        "status": "Active",
         "designation": "Backend Developer",
-        "department": "Engineering",
-        "password": "e002123"
+        "department": "HR",
+        "password": "$2b$12$nGH1obTvrCT1iwLfEys6YO988EnZ9dFbWVZlmQ1gUXxemMrgHso3u"
     },
     {
         "employee_id": "E003",
         "name": "Priya Nair",
-        "email": "priya@company.com",
+        "email": "priya@aionboarding.com",
         "role": "EMPLOYEE",
         "skills": [
             "Python",
@@ -57,7 +57,7 @@
     {
         "employee_id": "E004",
         "name": "Vikram Joshi",
-        "email": "vikram@company.com",
+        "email": "vikram@aionboarding.com",
         "role": "EMPLOYEE",
         "skills": [
             "React",
@@ -74,7 +74,7 @@
     {
         "employee_id": "E005",
         "name": "Sneha Patil",
-        "email": "sneha@company.com",
+        "email": "sneha@aionboarding.com",
         "role": "EMPLOYEE",
         "skills": [
             "Python",
@@ -91,7 +91,7 @@
     {
         "employee_id": "E006",
         "name": "Arjun Mehta",
-        "email": "arjun@company.com",
+        "email": "arjun@aionboarding.com",
         "role": "EMPLOYEE",
         "skills": [
             "Java",
@@ -108,7 +108,7 @@
     {
         "employee_id": "HR001",
         "name": "HR Manager",
-        "email": "hr@company.com",
+        "email": "hr@aionboarding.com",
         "role": "HR",
         "skills": [
             "Recruiting",
@@ -123,7 +123,7 @@
     {
         "employee_id": "ADMIN001",
         "name": "Admin User",
-        "email": "admin@company.com",
+        "email": "admin@aionboarding.com",
         "role": "ADMIN",
         "skills": [
             "Administration",
@@ -133,6 +133,6 @@
         "status": "Active",
         "designation": "System Administrator",
         "department": "IT",
-        "password": "admin123"
+        "password": "$2b$12$70CnBHcak7G/uvHdtwgI8O68wfPR3L9VVJyP.O1mbVgKl7Sk8W4wS"
     }
 ]

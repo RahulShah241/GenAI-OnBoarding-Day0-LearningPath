@@ -26,7 +26,7 @@ SECRET_KEY: str = os.getenv(
 )
 ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
-    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
+    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "45")
 )
 
 # ── Password hashing ─────────────────────────────────────────────────────────

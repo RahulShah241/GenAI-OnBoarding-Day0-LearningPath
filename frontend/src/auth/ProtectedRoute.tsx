@@ -12,10 +12,10 @@ interface ProtectedRouteProps {
  *   2. Does the user's role match the allowed roles? → else redirect to /login
  */
 export default function ProtectedRoute({ roles, children }: ProtectedRouteProps) {
+  const isSessionValid = Data((state) => state.isSessionValid);
   const user = Data((state) => state.user);
-  const token = Data((state) => state.token);
 
-  if (!user || !token) return <Navigate to="/login" replace />;
+  if (!isSessionValid() || !user) return <Navigate to="/login" replace />;
   if (!roles.includes(user.role)) return <Navigate to="/login" replace />;
 
   return <>{children}</>;

@@ -179,3 +179,29 @@ export function useChangePassword() {
       ),
   });
 }
+
+// ─── Auth — update user (ADMIN only) ──────────────────────────────────────────
+
+export interface UpdateUserPayload {
+  employee_id: string;
+  name?: string;
+  email?: string;
+  password?: string;
+  role?: "EMPLOYEE" | "HR" | "ADMIN";
+  skills?: string[];
+  experience?: number;
+  status?: string;
+  designation?: string;
+  department?: string;
+}
+
+export function useUpdateUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ employee_id, ...payload }: UpdateUserPayload) =>
+      authFetch(`${BASE}/employees/${employee_id}`, { method: "PUT", body: JSON.stringify(payload) }).then((r) =>
+        checked<Employee>(r)
+      ),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
+  });
+}

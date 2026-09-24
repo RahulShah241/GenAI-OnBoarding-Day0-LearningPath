@@ -40,6 +40,7 @@ from matching import calculate_match
 from schemas import (
     Employee,
     EmployeePublic,
+    EmployeeUpdate,
     ProjectCreate,
     ProjectDescription,
     ProjectSummary,
@@ -559,6 +560,70 @@ def add_employee(
     write_json("employees.json", employees)
     logger.info("Employee added via /employees: %s", employee.get("employee_id"))
     return _employee_to_public(employee)
+
+
+@app.put(
+    "/employees/{employee_id}",
+    response_model=EmployeePublic,
+    summary="Update employee details (ADMIN only)",
+    tags=["Employees"],
+)
+def update_employee(
+    employee_id: str,
+    payload: EmployeeUpdate,
+    _current: TokenData = Depends(require_roles("ADMIN")),
+) -> dict:
+    employees: list[dict] = read_json("employees.json")
+    idx = next((i for i, e in enumerate(employees) if e["employee_id"] == employee_id), None)
+    if idx is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
+
+    emp = employees[idx]
+
+    if payload.email and payload.email.lower() != emp["email"].lower():
+        if any(e["email"].lower() == payload.email.lower() and e["employee_id"] != employee_id for e in employees):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Email '{payload.email}' is already registered to another user",
+            )
+
+    if payload.name is not None:
+        emp["name"] = payload.name
+    if payload.email is not None:
+        emp["email"] = payload.email
+    if payload.role is not None:
+        emp["role"] = payload.role
+    if payload.skills is not None:
+        emp["skills"] = payload.skills
+    if payload.experience is not None:
+        emp["experience"] = payload.experience
+    if payload.status is not None:
+        emp["status"] = payload.status
+    if payload.designation is not None:
+        emp["designation"] = payload.designation
+    if payload.department is not None:
+        emp["department"] = payload.department
+    if payload.password and payload.password.strip():
+        from auth.security import hash_password
+        emp["password"] = hash_password(payload.password)
+
+    employees[idx] = emp
+    write_json("employees.json", employees)
+    logger.info("Updated employee %s", employee_id)
+
+    profile_file = get_profile_file(employee_id)
+    if profile_file.exists():
+        try:
+            p_data = json.loads(profile_file.read_text(encoding="utf-8"))
+            if payload.name is not None:
+                p_data["name"] = payload.name
+            if payload.email is not None:
+                p_data["email"] = payload.email
+            profile_file.write_text(json.dumps(p_data, indent=2, ensure_ascii=False), encoding="utf-8")
+        except Exception as e:
+            logger.warning("Could not sync updated info to profile file: %s", e)
+
+    return _employee_to_public(emp)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

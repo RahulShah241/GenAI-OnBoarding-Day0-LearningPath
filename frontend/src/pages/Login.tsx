@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Data } from "@/store/Data";
 import { useNavigate } from "react-router-dom";
 import { Lock, AlertCircle, Eye, EyeOff, Shield, Check, Loader2 } from "lucide-react";
@@ -15,23 +15,29 @@ export default function Login() {
   const isLoading = Data((state) => state.isLoading);
   const loginError = Data((state) => state.loginError);
   const user = Data((state) => state.user);
+  const token = Data((state) => state.token);
   const navigate = useNavigate();
 
-  // Already authenticated → redirect immediately
-  if (user) {
-    if (user.role === "ADMIN") navigate("/admin", { replace: true });
-    else if (user.role === "HR") navigate("/hr", { replace: true });
-    else navigate("/employee", { replace: true });
-  }
+  // Already authenticated → redirect cleanly via useEffect
+  useEffect(() => {
+    const valid = Data.getState().isSessionValid();
+    if (valid && user) {
+      if (user.role === "ADMIN") navigate("/admin", { replace: true });
+      else if (user.role === "HR") navigate("/hr", { replace: true });
+      else navigate("/employee", { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const ok = await login(email, password);
     if (!ok) return;
-    const role = Data.getState().user?.role;
-    if (role === "ADMIN") navigate("/admin");
-    else if (role === "HR") navigate("/hr");
-    else navigate("/employee");
+    const currentUser = Data.getState().user;
+    if (currentUser) {
+      if (currentUser.role === "ADMIN") navigate("/admin", { replace: true });
+      else if (currentUser.role === "HR") navigate("/hr", { replace: true });
+      else navigate("/employee", { replace: true });
+    }
   };
 
   return (
@@ -93,9 +99,9 @@ export default function Login() {
           <div className="mt-6 p-4 rounded-lg bg-muted border border-border">
             <p className="text-sm font-medium mb-2">Test Accounts</p>
             <div className="space-y-1 text-xs text-muted-foreground">
-              <p><strong>Admin:</strong> admin@company.com / admin123</p>
-              <p><strong>HR:</strong> hr@company.com / hr123</p>
-              <p><strong>Employee:</strong> rahul@company.com / e001123</p>
+              <p><strong>Admin:</strong> admin@aionboarding.com / admin123</p>
+              <p><strong>HR:</strong> hr@aionboarding.com / hr123</p>
+              <p><strong>Employee:</strong> rahul@aionboarding.com / e001123</p>
             </div>
           </div>
 

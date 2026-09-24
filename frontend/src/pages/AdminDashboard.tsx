@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, UserPlus, Loader2, AlertCircle, Users } from "lucide-react";
-import { useEmployees, useRegisterUser, type RegisterPayload } from "@/api/hooks";
+import { UserPlus, Loader2, AlertCircle, Users, Pencil } from "lucide-react";
+import { useEmployees, useRegisterUser, useUpdateUser, type RegisterPayload, type UpdateUserPayload, type Employee } from "@/api/hooks";
 import { Data } from "@/store/Data";
 import { toast } from "sonner";
 
@@ -56,7 +56,16 @@ function AddUserDialog({ open, onClose }: { open: boolean; onClose: () => void }
           <Input placeholder="Full Name" value={form.name} onChange={(e) => set("name", e.target.value)} />
           <Input placeholder="Email" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
           <Input placeholder="Password" type="password" value={form.password} onChange={(e) => set("password", e.target.value)} />
-          <Select value={form.role} onValueChange={(v) => set("role", v)}>
+          <Select
+            value={form.role}
+            onValueChange={(v) => {
+              setForm((p) => ({
+                ...p,
+                role: v,
+                status: v === "EMPLOYEE" ? "Bench" : "Active",
+              }));
+            }}
+          >
             <SelectTrigger><SelectValue placeholder="Role" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="EMPLOYEE">Employee</SelectItem>
@@ -68,28 +77,181 @@ function AddUserDialog({ open, onClose }: { open: boolean; onClose: () => void }
             <Input placeholder="Designation (optional)" value={form.designation ?? ""} onChange={(e) => set("designation", e.target.value)} />
             <Input placeholder="Department (optional)" value={form.department ?? ""} onChange={(e) => set("department", e.target.value)} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          {form.role === "EMPLOYEE" ? (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-muted-foreground">Experience (yrs)</label>
+                <Input type="number" min="0" value={form.experience} onChange={(e) => set("experience", parseFloat(e.target.value) || 0)} />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Status</label>
+                <Select value={form.status} onValueChange={(v) => set("status", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Bench">Bench</SelectItem>
+                    <SelectItem value="Allocated">Allocated</SelectItem>
+                    <SelectItem value="Active">Active</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ) : (
             <div>
               <label className="text-xs text-muted-foreground">Experience (yrs)</label>
               <Input type="number" min="0" value={form.experience} onChange={(e) => set("experience", parseFloat(e.target.value) || 0)} />
             </div>
-            <div>
-              <label className="text-xs text-muted-foreground">Status</label>
-              <Select value={form.status} onValueChange={(v) => set("status", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Bench">Bench</SelectItem>
-                  <SelectItem value="Allocated">Allocated</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} disabled={isPending}>Cancel</Button>
           <Button onClick={handleSubmit} disabled={isPending}>
             {isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Registering…</> : "Register User"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Edit User Dialog ─────────────────────────────────────────────────────────
+function EditUserDialog({ user, onClose }: { user: Employee | null; onClose: () => void }) {
+  const [form, setForm] = useState<UpdateUserPayload>({
+    employee_id: "",
+    name: "",
+    email: "",
+    password: "",
+    role: "EMPLOYEE",
+    skills: [],
+    experience: 0,
+    status: "Bench",
+    designation: "",
+    department: "",
+  });
+
+  useEffect(() => {
+    if (user) {
+      setForm({
+        employee_id: user.employee_id,
+        name: user.name,
+        email: user.email,
+        password: "",
+        role: user.role as "EMPLOYEE" | "HR" | "ADMIN",
+        skills: user.skills || [],
+        experience: user.experience || 0,
+        status: user.status || (user.role === "EMPLOYEE" ? "Bench" : "Active"),
+        designation: user.designation || "",
+        department: user.department || "",
+      });
+    }
+  }, [user]);
+
+  const { mutate: updateUser, isPending, error, reset } = useUpdateUser();
+
+  const set = (field: keyof UpdateUserPayload, val: any) =>
+    setForm((p) => ({ ...p, [field]: val }));
+
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
+  const handleSubmit = () => {
+    if (!form.name || !form.email) {
+      toast.error("Name and email are required");
+      return;
+    }
+    updateUser(form, {
+      onSuccess: (emp) => {
+        toast.success(`User ${emp.name} updated successfully`);
+        handleClose();
+      },
+      onError: (err: Error) => toast.error(err.message),
+    });
+  };
+
+  if (!user) return null;
+
+  return (
+    <Dialog open={!!user} onOpenChange={handleClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>Edit User ({user.employee_id})</DialogTitle></DialogHeader>
+        <div className="space-y-3 py-2">
+          {error && (
+            <div className="p-3 rounded-lg bg-destructive/10 text-destructive flex items-center gap-2 text-sm">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />{(error as Error).message}
+            </div>
+          )}
+          <div>
+            <label className="text-xs text-muted-foreground">Full Name</label>
+            <Input placeholder="Full Name" value={form.name ?? ""} onChange={(e) => set("name", e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Email</label>
+            <Input placeholder="Email" type="email" value={form.email ?? ""} onChange={(e) => set("email", e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">New Password (leave blank to keep current)</label>
+            <Input placeholder="New password" type="password" value={form.password ?? ""} onChange={(e) => set("password", e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Role</label>
+            <Select
+              value={form.role}
+              onValueChange={(v) => {
+                setForm((p) => ({
+                  ...p,
+                  role: v as any,
+                  status: v === "EMPLOYEE" ? (p.status === "Active" ? "Bench" : p.status) : "Active",
+                }));
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="Role" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="EMPLOYEE">Employee</SelectItem>
+                <SelectItem value="HR">HR</SelectItem>
+                <SelectItem value="ADMIN">Admin</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-muted-foreground">Designation</label>
+              <Input placeholder="Designation" value={form.designation ?? ""} onChange={(e) => set("designation", e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Department</label>
+              <Input placeholder="Department" value={form.department ?? ""} onChange={(e) => set("department", e.target.value)} />
+            </div>
+          </div>
+          {form.role === "EMPLOYEE" ? (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-muted-foreground">Experience (yrs)</label>
+                <Input type="number" min="0" value={form.experience ?? 0} onChange={(e) => set("experience", parseFloat(e.target.value) || 0)} />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Status</label>
+                <Select value={form.status} onValueChange={(v) => set("status", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Bench">Bench</SelectItem>
+                    <SelectItem value="Allocated">Allocated</SelectItem>
+                    <SelectItem value="Active">Active</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <label className="text-xs text-muted-foreground">Experience (yrs)</label>
+              <Input type="number" min="0" value={form.experience ?? 0} onChange={(e) => set("experience", parseFloat(e.target.value) || 0)} />
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose} disabled={isPending}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={isPending}>
+            {isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving…</> : "Save Changes"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -106,6 +268,7 @@ const ROLE_BADGE: Record<string, "destructive" | "default" | "secondary"> = {
 
 export default function AdminDashboard() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<Employee | null>(null);
   const [search, setSearch] = useState("");
   const currentUser = Data((state) => state.user);
 
@@ -177,6 +340,7 @@ export default function AdminDashboard() {
                   <TableHead>Role</TableHead>
                   <TableHead>Designation</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -199,11 +363,21 @@ export default function AdminDashboard() {
                         {u.status ?? "—"}
                       </Badge>
                     </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 gap-1"
+                        onClick={() => setEditingUser(u)}
+                      >
+                        <Pencil className="w-3.5 h-3.5" /> Edit
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
                       No users found
                     </TableCell>
                   </TableRow>
@@ -215,6 +389,7 @@ export default function AdminDashboard() {
       </Card>
 
       <AddUserDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
+      <EditUserDialog user={editingUser} onClose={() => setEditingUser(null)} />
     </div>
   );
 }
