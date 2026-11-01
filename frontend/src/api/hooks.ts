@@ -242,3 +242,42 @@ export function useProjectRecommendedCourses(
     staleTime: 5 * 60 * 1000,
   });
 }
+
+// ─── AI Professional Tutor Learning Path ──────────────────────────────────────
+
+export interface PracticalDemo {
+  title: string;
+  code_snippet: string;
+  hands_on_task: string;
+}
+
+export interface LearningTier {
+  tier_name: string;
+  priority: "High" | "Medium" | "Low" | string;
+  skill_name: string;
+  required_frameworks: string[];
+  estimated_duration: string;
+  learning_objectives: string[];
+  practical_demo: PracticalDemo;
+}
+
+export interface LearningPathResponse {
+  api_available: boolean;
+  warning_message?: string;
+  project_id?: string;
+  project_name?: string;
+  tutor_summary?: string;
+  learning_tiers?: LearningTier[];
+}
+
+export function useProjectLearningPath(projectId: string | undefined) {
+  return useQuery<LearningPathResponse>({
+    queryKey: ["project-learning-path", projectId],
+    queryFn: () =>
+      authFetch(`${BASE}/projects/${projectId}/learning-path`).then((r) =>
+        checked<LearningPathResponse>(r)
+      ),
+    enabled: !!projectId,
+    staleTime: 5 * 60 * 1000,
+  });
+}

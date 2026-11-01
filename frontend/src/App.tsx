@@ -20,6 +20,7 @@ import AddProject from "@/pages/AddProject";
 import EmployeeList from "@/pages/EmployeesList";
 import EmployeeDetails from "@/pages/EmployeesDetails";
 import EmployeeJobMatches from "@/pages/EmployeeJobMatches";
+import EmployeeMatchSummaryDetail from "@/pages/EmployeeMatchSummaryDetail";
 import HRProjectSuggestions from "@/pages/HRProjectSuggestions";
 import NotFound from "@/pages/NotFound";
 
@@ -158,6 +159,16 @@ const App = () => (
               <ProtectedRoute roles={["EMPLOYEE"]}>
                 <AppLayout>
                   <EmployeeJobMatches />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/job-matches/:projectId"
+            element={
+              <ProtectedRoute roles={["EMPLOYEE"]}>
+                <AppLayout>
+                  <EmployeeMatchSummaryDetail />
                 </AppLayout>
               </ProtectedRoute>
             }

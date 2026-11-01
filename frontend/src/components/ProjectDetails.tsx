@@ -8,6 +8,7 @@ import { useProjectById } from "@/api/hooks";
 import { Button } from "./ui/button";
 
 import RecommendedCoursesBlock from "./RecommendedCoursesBlock";
+import LearningPathBlock from "./LearningPathBlock";
 
 interface ProjectDetailsProps {
   project: ProjectDescription;
@@ -117,6 +118,7 @@ console.log(project)
           ))}
         </div>
         <RecommendedCoursesBlock projectId={project.project_id} />
+        <LearningPathBlock projectId={project.project_id} />
       </Section>
 
       {/* Responsibilities */}

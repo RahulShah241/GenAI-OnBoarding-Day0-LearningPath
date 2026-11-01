@@ -31,7 +31,14 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
-load_dotenv()
+_BACKEND_ENV = Path(__file__).resolve().parent / ".env"
+_ROOT_ENV = Path(__file__).resolve().parent.parent / ".env"
+if _BACKEND_ENV.exists():
+    load_dotenv(_BACKEND_ENV, override=True)
+elif _ROOT_ENV.exists():
+    load_dotenv(_ROOT_ENV, override=True)
+else:
+    load_dotenv(override=True)
 
 from auth.dependencies import get_current_user, require_roles
 from auth.router import router as auth_router
@@ -736,4 +743,35 @@ def get_recommended_courses(
         "gap_skills": gap_skills,
         "recommended_courses": courses,
     }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AI TUTOR LEARNING PATH GENERATOR
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get(
+    "/projects/{project_id}/learning-path",
+    summary="Get AI Professional Tutor learning path ordered by high-to-low priority with practical code demos",
+    tags=["Matching"],
+)
+def get_tutor_learning_path(
+    project_id: str,
+    current: TokenData = Depends(get_current_user),
+) -> dict:
+    from database import get_project_by_id, get_profile
+    from services.learning_path import generate_learning_path
+
+    project = get_project_by_id(project_id)
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
+    emp_skills: list[str] = getattr(current, "skills", []) or []
+    prof = get_profile(current.employee_id)
+    if prof and isinstance(prof.get("merged_skills"), list):
+        emp_skills = prof["merged_skills"]
+
+    path_data = generate_learning_path(project, emp_skills)
+    path_data["project_id"] = project_id
+    return path_data
+
 
