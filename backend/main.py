@@ -8,9 +8,9 @@ New in v3
   • NLP threshold enforcement — answers scoring below SCORE_THRESHOLD return
     threshold_passed=False and a retry message; the answer is NOT stored.
   • Profile generation — after every topic submission the full EmployeeProfile
-    is regenerated and saved to  data/profiles/{employee_id}.json
+    is regenerated and saved to SQLite employee_profiles table
   • Skill sync — merged_skills from the profile are written back to
-    employees.json so job-matching always uses the richest skill set.
+    the SQLite employees table so job-matching always uses the richest skill set.
   • GET /employee/profile/{employee_id}       — own profile (EMPLOYEE) or any (HR/ADMIN)
   • GET /hr/employee-profiles                 — HR/ADMIN list of all profiles
   • POST /employee/finalize-profile           — explicitly regenerate + store profile
@@ -22,6 +22,7 @@ import json
 import logging
 import re
 import uuid
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List, Optional
 
@@ -42,7 +43,23 @@ else:
 
 from auth.dependencies import get_current_user, require_roles
 from auth.router import router as auth_router
-from json_db import append_json, read_json, write_json
+from database import (
+    init_db,
+    get_all_employees,
+    get_employee_by_id,
+    get_employee_by_email,
+    save_employee,
+    delete_employee,
+    get_all_projects,
+    get_project_by_id,
+    save_project,
+    delete_project,
+    get_chat_history,
+    save_chat_history,
+    get_profile,
+    get_all_profiles,
+    save_profile,
+)
 from matching import calculate_match
 from schemas import (
     Employee,
@@ -55,7 +72,6 @@ from schemas import (
     TokenData,
     TopicResponseCreate,
 )
-from database import init_db
 from services.llm_scoring import llm_score
 from services.nlp_scoring import nlp_score, SCORE_THRESHOLD
 from services.scoring_engine import combine_scores
@@ -68,6 +84,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
 app = FastAPI(
     title="Employee–Project Matching Platform",
     description=(
@@ -75,11 +96,8 @@ app = FastAPI(
         "All endpoints (except /auth/login) require a valid JWT Bearer token."
     ),
     version="3.0.0",
+    lifespan=lifespan,
 )
-
-@app.on_event("startup")
-def on_startup():
-    init_db()
 
 origins_env = os.getenv("ALLOWED_ORIGINS", "*")
 if origins_env.strip() == "*":
@@ -108,72 +126,47 @@ app.add_middleware(
 
 app.include_router(auth_router)
 
-_RESPONSE_DIR = Path(__file__).resolve().parent / "data" / "employee_responses"
-_PROFILE_DIR = Path(__file__).resolve().parent / "data" / "profiles"
-_RESPONSE_DIR.mkdir(parents=True, exist_ok=True)
-_PROFILE_DIR.mkdir(parents=True, exist_ok=True)
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # HELPERS
 # ══════════════════════════════════════════════════════════════════════════════
-
-def _safe_email_to_filename(email: str) -> str:
-    sanitised = re.sub(r"[^a-zA-Z0-9@._-]", "", email)
-    return sanitised.replace("@", "_AT_").replace(".", "_")
-
-
-def get_employee_file(email: str) -> Path:
-    stem = _safe_email_to_filename(email)
-    if not stem:
-        raise ValueError("Invalid email address")
-    return _RESPONSE_DIR / f"{stem}.json"
-
-
-def get_profile_file(employee_id: str) -> Path:
-    safe = re.sub(r"[^a-zA-Z0-9_-]", "_", employee_id)
-    return _PROFILE_DIR / f"{safe}.json"
-
 
 def _employee_to_public(emp: dict) -> dict:
     return {k: v for k, v in emp.items() if k != "password"}
 
 
 def _get_base_employee(employee_id: str) -> dict | None:
-    employees: list[dict] = read_json("employees.json")
-    return next((e for e in employees if e["employee_id"] == employee_id), None)
+    return get_employee_by_id(employee_id)
 
 
 def _sync_skills_to_employee(employee_id: str, merged_skills: list[str]) -> None:
-    """Update the skills array in employees.json with NLP-extracted skills."""
-    employees: list[dict] = read_json("employees.json")
-    for emp in employees:
-        if emp["employee_id"] == employee_id:
-            existing = set(s.lower() for s in emp.get("skills", []))
-            new_skills = [s for s in merged_skills if s.lower() not in existing]
+    """Update the skills array in SQLite employees table with NLP-extracted skills."""
+    emp = get_employee_by_id(employee_id)
+    if emp:
+        existing = set(s.lower() for s in emp.get("skills", []))
+        new_skills = [s for s in merged_skills if s.lower() not in existing]
+        if new_skills:
             emp["skills"] = emp.get("skills", []) + new_skills
-            break
-    write_json("employees.json", employees)
+            save_employee(emp)
 
 
 def _regenerate_and_save_profile(response_data: dict) -> dict:
-    """Generate profile, save it, sync skills. Returns the profile dict."""
+    """Generate profile, save directly to SQLite, sync skills. Returns the profile dict."""
     employee_id = response_data.get("employee_id", "")
     base_emp = _get_base_employee(employee_id)
     profile = generate_profile(response_data, base_employee=base_emp)
 
-    profile_file = get_profile_file(employee_id)
-    profile_file.write_text(
-        json.dumps(profile, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    # Save profile directly to SQLite
+    save_profile(employee_id, profile)
 
-    # Sync skills back to employees.json
+    # Sync skills back to employee in SQLite
     merged = profile.get("merged_skills", [])
     if merged:
         _sync_skills_to_employee(employee_id, merged)
 
-    logger.info("Profile regenerated for %s (score=%.2f)", employee_id, profile["overall_score"])
+    logger.info("Profile regenerated and saved in SQLite for %s (score=%.2f)", employee_id, profile.get("overall_score", 0.0))
     return profile
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -210,19 +203,20 @@ def save_topic_response(
             "min_score_required": SCORE_THRESHOLD,
         }
 
-    # ── Persist ────────────────────────────────────────────────────────────────
-    file_path = get_employee_file(payload.employee_email)
-    if file_path.exists():
-        data: dict = json.loads(file_path.read_text(encoding="utf-8"))
-    else:
-        data = {
+    # ── Persist to SQLite ──────────────────────────────────────────────────
+    chat_data = get_chat_history(payload.employee_id)
+    if not chat_data or not chat_data.get("responses"):
+        chat_data = {
             "employee_id": payload.employee_id,
             "employee_email": payload.employee_email,
             "role": payload.role,
             "responses": [],
         }
+    else:
+        chat_data["employee_email"] = payload.employee_email
+        chat_data["role"] = payload.role
 
-    data["responses"].append(
+    chat_data["responses"].append(
         {
             "topic": payload.topic,
             "question": payload.question,
@@ -231,12 +225,10 @@ def save_topic_response(
         }
     )
 
-    file_path.write_text(
-        json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    save_chat_history(payload.employee_id, chat_data)
 
-    # ── Regenerate profile ─────────────────────────────────────────────────────
-    profile = _regenerate_and_save_profile(data)
+    # ── Regenerate profile in SQLite ───────────────────────────────────────
+    profile = _regenerate_and_save_profile(chat_data)
 
     return {
         "message": "Response saved & evaluated",
@@ -271,18 +263,15 @@ def finalize_profile(
     if current.role == "EMPLOYEE" and current.employee_id != employee_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
-    # Find the response file by scanning for matching employee_id
     base_emp = _get_base_employee(employee_id)
     if not base_emp:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
 
-    email = base_emp["email"]
-    file_path = get_employee_file(email)
-    if not file_path.exists():
+    chat_data = get_chat_history(employee_id)
+    if not chat_data.get("responses"):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No chatbot responses found")
 
-    data = json.loads(file_path.read_text(encoding="utf-8"))
-    profile = _regenerate_and_save_profile(data)
+    profile = _regenerate_and_save_profile(chat_data)
 
     return {"message": "Profile finalized", "profile": profile}
 
@@ -324,18 +313,8 @@ def get_employee_progress(
     if not base_emp:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
 
-    file_path = get_employee_file(base_emp["email"])
-    if not file_path.exists():
-        return {
-            "has_progress": False,
-            "completed_topics": [],
-            "answered_questions": {},
-            "conversation_history": [],
-            "profile_snapshot": None,
-        }
-
-    data = json.loads(file_path.read_text(encoding="utf-8"))
-    responses: list[dict] = data.get("responses", [])
+    chat_data = get_chat_history(employee_id)
+    responses: list[dict] = chat_data.get("responses", [])
 
     # Build per-topic answered question sets (using question text as key)
     answered_questions: dict[str, list[str]] = {}
@@ -348,17 +327,13 @@ def get_employee_progress(
 
     # Load profile snapshot if available
     profile_snapshot = None
-    profile_file = get_profile_file(employee_id)
-    if profile_file.exists():
-        try:
-            p = json.loads(profile_file.read_text(encoding="utf-8"))
-            profile_snapshot = {
-                "overall_score": p.get("overall_score", 0),
-                "readiness": p.get("readiness", "Needs Development"),
-                "extracted_skills": p.get("extracted_skills", []),
-            }
-        except Exception:
-            pass
+    profile = get_profile(employee_id)
+    if profile:
+        profile_snapshot = {
+            "overall_score": profile.get("overall_score", 0),
+            "readiness": profile.get("readiness", "Needs Development"),
+            "extracted_skills": profile.get("extracted_skills", []),
+        }
 
     return {
         "has_progress": len(responses) > 0,
@@ -385,11 +360,11 @@ def get_employee_profile(
     if current.role == "EMPLOYEE" and current.employee_id != employee_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
-    profile_file = get_profile_file(employee_id)
-    if not profile_file.exists():
+    profile = get_profile(employee_id)
+    if not profile:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
 
-    return json.loads(profile_file.read_text(encoding="utf-8"))
+    return profile
 
 
 @app.get(
@@ -400,14 +375,8 @@ def get_employee_profile(
 def list_employee_profiles(
     _current: TokenData = Depends(require_roles("HR", "ADMIN")),
 ) -> list[dict]:
-    """Return all profiles from  data/profiles/"""
-    profiles = []
-    for f in sorted(_PROFILE_DIR.glob("*.json")):
-        try:
-            profiles.append(json.loads(f.read_text(encoding="utf-8")))
-        except Exception:
-            pass
-    return profiles
+    """Return all profiles from SQLite."""
+    return get_all_profiles()
 
 
 @app.get(
@@ -419,10 +388,12 @@ def get_employee_data(
     email: str,
     _current: TokenData = Depends(require_roles("HR", "ADMIN")),
 ) -> dict:
-    file_path = get_employee_file(email)
-    if not file_path.exists():
+    emp = get_employee_by_email(email)
+    emp_id = emp["employee_id"] if emp else email
+    chat_data = get_chat_history(emp_id)
+    if not chat_data.get("responses"):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee responses not found")
-    return json.loads(file_path.read_text(encoding="utf-8"))
+    return chat_data
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -438,16 +409,16 @@ def get_employee_data(
 def get_projects(
     _current: TokenData = Depends(require_roles("HR", "ADMIN")),
 ) -> list[dict]:
-    projects: list[dict] = read_json("projectDetails.json")
+    projects: list[dict] = get_all_projects()
     return [
         {
             "project_id": p["project_id"],
-            "project_name": p["project_name"],
-            "domain": p["domain"],
-            "business_unit": p["business_unit"],
-            "project_type": p["project_type"],
-            "current_status": p["status"]["current_status"],
-            "deployment_stage": p["status"]["deployment_stage"],
+            "project_name": p.get("project_name", ""),
+            "domain": p.get("domain", ""),
+            "business_unit": p.get("business_unit", ""),
+            "project_type": p.get("project_type", ""),
+            "current_status": p.get("status", {}).get("current_status", "Open") if isinstance(p.get("status"), dict) else "Open",
+            "deployment_stage": p.get("status", {}).get("deployment_stage", "Planning") if isinstance(p.get("status"), dict) else "Planning",
         }
         for p in projects
     ]
@@ -461,7 +432,7 @@ def get_projects(
 def get_projects_description(
     _current: TokenData = Depends(require_roles("HR", "ADMIN", "EMPLOYEE")),
 ) -> list[dict]:
-    return read_json("projectDetails.json")
+    return get_all_projects()
 
 
 @app.get(
@@ -473,8 +444,7 @@ def get_project(
     project_id: str,
     _current: TokenData = Depends(require_roles("HR", "ADMIN", "EMPLOYEE")),
 ) -> dict:
-    projects: list[dict] = read_json("projectDetails.json")
-    project = next((p for p in projects if p["project_id"] == project_id), None)
+    project = get_project_by_id(project_id)
     if not project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     return project
@@ -489,12 +459,11 @@ def get_project_recommended_courses(
     project_id: str,
     _current: TokenData = Depends(require_roles("HR", "ADMIN", "EMPLOYEE")),
 ) -> dict:
-    projects: list[dict] = read_json("projectDetails.json")
-    project = next((p for p in projects if p["project_id"] == project_id), None)
+    project = get_project_by_id(project_id)
     if not project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
 
-    skills = [s["skill_name"] for s in project.get("required_skills", []) if s.get("skill_name")]
+    skills = [s["skill_name"] for s in project.get("required_skills", []) if isinstance(s, dict) and s.get("skill_name")]
     courses = get_course_recommendations(skills)
     return {"project_id": project_id, "skills": skills, "recommended_courses": courses}
 
@@ -511,7 +480,7 @@ def add_project(
 ) -> dict:
     project_id = str(uuid.uuid4())
     new_project = ProjectDescription(project_id=project_id, **project.model_dump())
-    append_json("projectDetails.json", jsonable_encoder(new_project.model_dump()))
+    save_project(new_project.model_dump())
     logger.info("Project created: %s (%s)", project_id, project.project_name)
     return {"message": "Project added successfully", "project_id": project_id}
 
@@ -529,7 +498,7 @@ def add_project(
 def get_employees(
     _current: TokenData = Depends(require_roles("HR", "ADMIN")),
 ) -> list[dict]:
-    employees: list[dict] = read_json("employees.json")
+    employees: list[dict] = get_all_employees()
     return [_employee_to_public(e) for e in employees]
 
 
@@ -539,7 +508,7 @@ def get_employees(
     summary="Get a single employee by ID",
     tags=["Employees"],
 )
-def get_employee_by_id(
+def get_employee_by_id_endpoint(
     employee_id: str,
     current_user: TokenData = Depends(get_current_user),
 ) -> dict:
@@ -548,8 +517,7 @@ def get_employee_by_id(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Employees may only view their own record",
         )
-    employees: list[dict] = read_json("employees.json")
-    emp = next((e for e in employees if e["employee_id"] == employee_id), None)
+    emp = get_employee_by_id(employee_id)
     if not emp:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
     return _employee_to_public(emp)
@@ -569,16 +537,14 @@ def get_employee_chat_data(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Employees may only view their own chatbot data",
         )
-    # Look up email from employees.json to find the correct response file
-    base_emp = _get_base_employee(employee_id)
-    if base_emp:
-        file_path = get_employee_file(base_emp["email"])
-    else:
-        file_path = _RESPONSE_DIR / f"{employee_id}.json"
-
-    if not file_path.exists():
+    chat_data = get_chat_history(employee_id)
+    if not chat_data.get("responses"):
+        base_emp = _get_base_employee(employee_id)
+        if base_emp and base_emp.get("email"):
+            chat_data = get_chat_history(base_emp["email"])
+    if not chat_data.get("responses"):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat data not found")
-    return json.loads(file_path.read_text(encoding="utf-8"))
+    return chat_data
 
 
 @app.post(
@@ -592,15 +558,23 @@ def add_employee(
     employee: dict,
     _current: TokenData = Depends(require_roles("ADMIN")),
 ) -> dict:
-    employees: list[dict] = read_json("employees.json")
-    if any(e["employee_id"] == employee.get("employee_id") for e in employees):
+    emp_id = employee.get("employee_id")
+    if not emp_id or get_employee_by_id(emp_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Employee ID already exists",
         )
-    employees.append(employee)
-    write_json("employees.json", employees)
-    logger.info("Employee added via /employees: %s", employee.get("employee_id"))
+    if employee.get("email") and get_employee_by_email(employee["email"]):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered",
+        )
+    if employee.get("password"):
+        from auth.security import hash_password
+        if not (employee["password"].startswith("$2b$") or employee["password"].startswith("$2a$")):
+            employee["password"] = hash_password(employee["password"])
+    save_employee(employee)
+    logger.info("Employee added via /employees: %s", emp_id)
     return _employee_to_public(employee)
 
 
@@ -615,15 +589,13 @@ def update_employee(
     payload: EmployeeUpdate,
     _current: TokenData = Depends(require_roles("ADMIN")),
 ) -> dict:
-    employees: list[dict] = read_json("employees.json")
-    idx = next((i for i, e in enumerate(employees) if e["employee_id"] == employee_id), None)
-    if idx is None:
+    emp = get_employee_by_id(employee_id)
+    if emp is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
 
-    emp = employees[idx]
-
     if payload.email and payload.email.lower() != emp["email"].lower():
-        if any(e["email"].lower() == payload.email.lower() and e["employee_id"] != employee_id for e in employees):
+        existing_emp = get_employee_by_email(payload.email)
+        if existing_emp and existing_emp["employee_id"] != employee_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Email '{payload.email}' is already registered to another user",
@@ -649,21 +621,16 @@ def update_employee(
         from auth.security import hash_password
         emp["password"] = hash_password(payload.password)
 
-    employees[idx] = emp
-    write_json("employees.json", employees)
+    save_employee(emp)
     logger.info("Updated employee %s", employee_id)
 
-    profile_file = get_profile_file(employee_id)
-    if profile_file.exists():
-        try:
-            p_data = json.loads(profile_file.read_text(encoding="utf-8"))
-            if payload.name is not None:
-                p_data["name"] = payload.name
-            if payload.email is not None:
-                p_data["email"] = payload.email
-            profile_file.write_text(json.dumps(p_data, indent=2, ensure_ascii=False), encoding="utf-8")
-        except Exception as e:
-            logger.warning("Could not sync updated info to profile file: %s", e)
+    prof = get_profile(employee_id)
+    if prof:
+        if payload.name is not None:
+            prof["name"] = payload.name
+        if payload.email is not None:
+            prof["email"] = payload.email
+        save_profile(employee_id, prof)
 
     return _employee_to_public(emp)
 
@@ -682,12 +649,11 @@ def suggest_employees(
     project_id: str,
     _current: TokenData = Depends(require_roles("HR", "ADMIN")),
 ) -> list[SuggestedEmployee]:
-    projects: list[dict] = read_json("projectDetails.json")
-    project = next((p for p in projects if p["project_id"] == project_id), None)
+    project = get_project_by_id(project_id)
     if not project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
 
-    employees: list[dict] = read_json("employees.json")
+    employees: list[dict] = get_all_employees()
     suggestions = [calculate_match(project, emp) for emp in employees]
     suggestions.sort(key=lambda x: x.match_percentage, reverse=True)
     return suggestions
@@ -707,8 +673,7 @@ def get_recommended_courses(
     missing_skills: Optional[str] = Query(None, description="Comma-separated list of missing skills gap"),
     current: TokenData = Depends(get_current_user),
 ) -> dict:
-    projects: list[dict] = read_json("projectDetails.json")
-    project = next((p for p in projects if p.get("project_id") == project_id), None)
+    project = get_project_by_id(project_id)
     if not project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
 
@@ -718,15 +683,11 @@ def get_recommended_courses(
         gap_skills = [s.strip() for s in missing_skills.split(",") if s.strip()]
     else:
         emp_skills: list[str] = getattr(current, "skills", []) or []
-        profile_path = DATA_DIR / "profiles" / f"{current.employee_id}.json"
-        if profile_path.exists():
-            try:
-                pdata = json.loads(profile_path.read_text(encoding="utf-8"))
-                emp_skills = pdata.get("merged_skills", emp_skills)
-            except Exception:
-                pass
+        prof = get_profile(current.employee_id)
+        if prof and isinstance(prof.get("merged_skills"), list):
+            emp_skills = prof["merged_skills"]
 
-        req_skills = [s.get("skill_name", "") for s in project.get("required_skills", []) if s.get("skill_name")]
+        req_skills = [s.get("skill_name", "") for s in project.get("required_skills", []) if isinstance(s, dict) and s.get("skill_name")]
         for req in req_skills:
             matched = any(
                 emp_s.lower() in req.lower() or req.lower() in emp_s.lower()
@@ -773,5 +734,36 @@ def get_tutor_learning_path(
     path_data = generate_learning_path(project, emp_skills)
     path_data["project_id"] = project_id
     return path_data
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CAG (CACHE-AUGMENTED GENERATION) ANALYTICS & CACHE MANAGEMENT
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get(
+    "/cag/stats",
+    summary="Get real-time Cache-Augmented Generation (CAG) cost and token reduction metrics",
+    tags=["CAG Optimization"],
+)
+def get_cag_metrics() -> dict:
+    from services.cag_cache import get_cag_cache
+    return get_cag_cache().get_stats()
+
+
+@app.post(
+    "/cag/clear",
+    summary="Clear CAG cached generations",
+    tags=["CAG Optimization"],
+)
+def clear_cag_cache() -> dict:
+    from services.cag_cache import get_cag_cache
+    cag = get_cag_cache()
+    cleared = cag.invalidate("learning_path") + cag.invalidate("course_recs")
+    return {
+        "status": "success",
+        "message": "CAG cache successfully cleared",
+        "cleared_items": cleared,
+    }
+
 
 

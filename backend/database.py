@@ -96,8 +96,204 @@ def init_db() -> None:
                 )
             """)
         logger.info("SQLite database tables initialised at %s", DB_PATH)
+        seed_default_data(conn)
     finally:
         conn.close()
+
+
+def seed_default_data(conn: Optional[sqlite3.Connection] = None) -> None:
+    """Populate default data in SQLite if tables are currently empty."""
+    close_conn = False
+    if conn is None:
+        conn = get_db_connection()
+        close_conn = True
+
+    try:
+        from seed_data import DEFAULT_EMPLOYEES, DEFAULT_PROJECTS, DEFAULT_PROFILES
+    except ImportError:
+        try:
+            from backend.seed_data import DEFAULT_EMPLOYEES, DEFAULT_PROJECTS, DEFAULT_PROFILES
+        except ImportError:
+            DEFAULT_EMPLOYEES, DEFAULT_PROJECTS, DEFAULT_PROFILES = [], [], []
+
+    try:
+        # 1. Employees
+        emp_count = conn.execute("SELECT COUNT(*) FROM employees").fetchone()[0]
+        if emp_count == 0:
+            employees_to_seed = []
+            emp_json_path = DATA_DIR / "employees.json"
+            if emp_json_path.exists():
+                try:
+                    data = json.loads(emp_json_path.read_text(encoding="utf-8"))
+                    if isinstance(data, list) and len(data) > 0:
+                        employees_to_seed = data
+                except Exception as e:
+                    logger.warning("Failed to load employees.json during seed: %s", e)
+            if not employees_to_seed:
+                employees_to_seed = DEFAULT_EMPLOYEES
+
+            for emp in employees_to_seed:
+                skills_str = json.dumps(emp.get("skills", []), ensure_ascii=False) if isinstance(emp.get("skills"), list) else "[]"
+                conn.execute("""
+                    INSERT INTO employees (
+                        employee_id, name, email, password, role, skills, experience, status, designation, department
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(employee_id) DO NOTHING
+                """, (
+                    emp["employee_id"],
+                    emp["name"],
+                    emp["email"],
+                    emp.get("password", ""),
+                    emp["role"],
+                    skills_str,
+                    emp.get("experience", 0.0),
+                    emp.get("status", "Active"),
+                    emp.get("designation"),
+                    emp.get("department")
+                ))
+            conn.commit()
+            logger.info("Seeded %d employees into SQLite database", len(employees_to_seed))
+
+        # 2. Projects
+        proj_count = conn.execute("SELECT COUNT(*) FROM projects").fetchone()[0]
+        if proj_count == 0:
+            projects_to_seed = []
+            proj_json_path = DATA_DIR / "projectDetails.json"
+            if proj_json_path.exists():
+                try:
+                    data = json.loads(proj_json_path.read_text(encoding="utf-8"))
+                    if isinstance(data, list) and len(data) > 0:
+                        projects_to_seed = data
+                except Exception as e:
+                    logger.warning("Failed to load projectDetails.json during seed: %s", e)
+            if not projects_to_seed:
+                projects_to_seed = DEFAULT_PROJECTS
+
+            for proj in projects_to_seed:
+                conn.execute("""
+                    INSERT INTO projects (
+                        project_id, project_name, domain, business_unit, project_type,
+                        project_overview, project_duration, required_roles, required_skills,
+                        responsibilities, delivery_model, deployment_readiness_criteria, status
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(project_id) DO NOTHING
+                """, (
+                    proj["project_id"],
+                    proj.get("project_name", ""),
+                    proj.get("domain", ""),
+                    proj.get("business_unit", ""),
+                    proj.get("project_type", ""),
+                    json.dumps(proj.get("project_overview", {}), ensure_ascii=False),
+                    json.dumps(proj.get("project_duration", {}), ensure_ascii=False),
+                    json.dumps(proj.get("required_roles", []), ensure_ascii=False),
+                    json.dumps(proj.get("required_skills", []), ensure_ascii=False),
+                    json.dumps(proj.get("responsibilities", []), ensure_ascii=False),
+                    json.dumps(proj.get("delivery_model", {}), ensure_ascii=False),
+                    json.dumps(proj.get("deployment_readiness_criteria", {}), ensure_ascii=False),
+                    json.dumps(proj.get("status", {}), ensure_ascii=False),
+                ))
+            conn.commit()
+            logger.info("Seeded %d projects into SQLite database", len(projects_to_seed))
+
+        # 3. Employee Responses
+        resp_count = conn.execute("SELECT COUNT(*) FROM employee_responses").fetchone()[0]
+        if resp_count == 0:
+            resp_dir = DATA_DIR / "employee_responses"
+            if resp_dir.exists():
+                count = 0
+                for f in resp_dir.glob("*.json"):
+                    try:
+                        data = json.loads(f.read_text(encoding="utf-8"))
+                        emp_id = data.get("employee_id") or f.stem
+                        responses_str = json.dumps(data.get("responses", []), ensure_ascii=False)
+                        conn.execute("""
+                            INSERT INTO employee_responses (employee_id, responses)
+                            VALUES (?, ?)
+                            ON CONFLICT(employee_id) DO NOTHING
+                        """, (emp_id, responses_str))
+                        count += 1
+                    except Exception as e:
+                        logger.warning("Failed to seed chat response from %s: %s", f, e)
+                conn.commit()
+                if count > 0:
+                    logger.info("Seeded %d chat responses into SQLite database", count)
+
+        # 4. Employee Profiles
+        prof_count = conn.execute("SELECT COUNT(*) FROM employee_profiles").fetchone()[0]
+        if prof_count == 0:
+            prof_dir = DATA_DIR / "profiles"
+            seeded = False
+            if prof_dir.exists():
+                count = 0
+                for f in prof_dir.glob("*.json"):
+                    if f.name == ".gitkeep":
+                        continue
+                    try:
+                        profile = json.loads(f.read_text(encoding="utf-8"))
+                        emp_id = profile.get("employee_id") or f.stem
+                        conn.execute("""
+                            INSERT INTO employee_profiles (
+                                employee_id, overall_score, readiness, tech_readiness, domain_knowledge,
+                                extracted_skills, merged_skills, current_role_summary, soft_skills,
+                                learning_interests, suggested_next_steps, name, email, experience
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            ON CONFLICT(employee_id) DO NOTHING
+                        """, (
+                            emp_id,
+                            profile.get("overall_score", 0.0),
+                            profile.get("readiness", "Low"),
+                            profile.get("tech_readiness", 0.0),
+                            profile.get("domain_knowledge", 0.0),
+                            json.dumps(profile.get("extracted_skills", []), ensure_ascii=False),
+                            json.dumps(profile.get("merged_skills", []), ensure_ascii=False),
+                            profile.get("current_role_summary"),
+                            json.dumps(profile.get("soft_skills", {}), ensure_ascii=False),
+                            json.dumps(profile.get("learning_interests", []), ensure_ascii=False),
+                            json.dumps(profile.get("suggested_next_steps", []), ensure_ascii=False),
+                            profile.get("name"),
+                            profile.get("email"),
+                            profile.get("experience", 0.0),
+                        ))
+                        count += 1
+                    except Exception as e:
+                        logger.warning("Failed to seed profile from %s: %s", f, e)
+                conn.commit()
+                if count > 0:
+                    seeded = True
+                    logger.info("Seeded %d profiles into SQLite database", count)
+
+            if not seeded and DEFAULT_PROFILES:
+                for profile in DEFAULT_PROFILES:
+                    emp_id = profile["employee_id"]
+                    conn.execute("""
+                        INSERT INTO employee_profiles (
+                            employee_id, overall_score, readiness, tech_readiness, domain_knowledge,
+                            extracted_skills, merged_skills, current_role_summary, soft_skills,
+                            learning_interests, suggested_next_steps, name, email, experience
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT(employee_id) DO NOTHING
+                    """, (
+                        emp_id,
+                        profile.get("overall_score", 0.0),
+                        profile.get("readiness", "Low"),
+                        profile.get("tech_readiness", 0.0),
+                        profile.get("domain_knowledge", 0.0),
+                        json.dumps(profile.get("extracted_skills", []), ensure_ascii=False),
+                        json.dumps(profile.get("merged_skills", []), ensure_ascii=False),
+                        profile.get("current_role_summary"),
+                        json.dumps(profile.get("soft_skills", {}), ensure_ascii=False),
+                        json.dumps(profile.get("learning_interests", []), ensure_ascii=False),
+                        json.dumps(profile.get("suggested_next_steps", []), ensure_ascii=False),
+                        profile.get("name"),
+                        profile.get("email"),
+                        profile.get("experience", 0.0),
+                    ))
+                conn.commit()
+                logger.info("Seeded %d default profiles into SQLite database", len(DEFAULT_PROFILES))
+    finally:
+        if close_conn:
+            conn.close()
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════

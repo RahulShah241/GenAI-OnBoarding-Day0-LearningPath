@@ -240,17 +240,17 @@ class TestProjectIntegration(unittest.TestCase):
     @unittest.skipUnless(HAS_BACKEND_MODULES, "Backend modules not loaded")
     def test_matching_retrieval_ranking(self):
         """Validates that matching retrieval ranks candidates according to project requirements."""
-        # Load sample project from backend data
-        project_file = _BACKEND_DIR / "data" / "projectDetails.json"
-        employee_file = _BACKEND_DIR / "data" / "employees.json"
+        # Load sample project and employees from SQLite database
+        try:
+            from database import init_db, get_all_projects, get_all_employees
+            init_db()
+            projects = get_all_projects()
+            employees = get_all_employees()
+        except Exception:
+            projects, employees = [], []
 
-        if not project_file.exists() or not employee_file.exists():
-            self.skipTest("Data files not found")
-
-        with open(project_file, "r", encoding="utf-8") as f:
-            projects = json.load(f)
-        with open(employee_file, "r", encoding="utf-8") as f:
-            employees = json.load(f)
+        if not projects or not employees:
+            self.skipTest("Data not found in database")
 
         p001 = next((p for p in projects if p["project_id"] == "P001"), None)
         self.assertIsNotNone(p001)

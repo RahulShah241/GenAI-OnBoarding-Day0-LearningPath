@@ -56,6 +56,16 @@ def get_course_recommendations(gap_skills: list[str]) -> list[dict]:
     if not gap_skills:
         return []
 
+    # ── CAG: Cache-Augmented Generation Check ─────────────────────────────────
+    from services.cag_cache import get_cag_cache
+    cag = get_cag_cache()
+    cag_key_skills = sorted(s.strip().lower() for s in gap_skills if s.strip())
+
+    cached_courses = cag.get("course_recs", cag_key_skills)
+    if cached_courses and isinstance(cached_courses, list) and len(cached_courses) > 0:
+        logger.info("CAG Cache HIT: Reusing cached courses for %s (0 LLM cost)", cag_key_skills)
+        return cached_courses
+
     skills_str = ", ".join(gap_skills)
     prompt = (
         f"You are an expert technical career coach. An employee has a skill gap in the following required skills: {skills_str}.\n"
@@ -85,6 +95,7 @@ def get_course_recommendations(gap_skills: list[str]) -> list[dict]:
                     clean_raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
                     parsed = json.loads(clean_raw)
                     if isinstance(parsed, list) and len(parsed) > 0:
+                        cag.set("course_recs", cag_key_skills, parsed, ttl_seconds=86400)
                         return parsed
             except Exception as exc:
                 err_str = str(exc)
@@ -114,6 +125,7 @@ def get_course_recommendations(gap_skills: list[str]) -> list[dict]:
                     clean_raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
                     parsed = json.loads(clean_raw)
                     if isinstance(parsed, list) and len(parsed) > 0:
+                        cag.set("course_recs", cag_key_skills, parsed, ttl_seconds=86400)
                         return parsed
             elif res.status_code == 400:
                 logger.warning("Gemini REST API call rejected key (HTTP 400): %s", res.text[:150])

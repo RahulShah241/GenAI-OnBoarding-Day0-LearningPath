@@ -68,6 +68,20 @@ def generate_learning_path(project_data: dict, employee_skills: list[str]) -> di
     gap_skills = [s for s in req_skills if not any(emp_s.lower() in s.lower() or s.lower() in emp_s.lower() for emp_s in employee_skills)]
     target_skills = gap_skills if gap_skills else req_skills
 
+    # ── CAG: Cache-Augmented Generation Check ─────────────────────────────────
+    from services.cag_cache import get_cag_cache
+    cag = get_cag_cache()
+    cag_key_data = {
+        "project_id": project_data.get("project_id", project_name),
+        "target_skills": sorted(s.strip().lower() for s in target_skills),
+    }
+    cached_path = cag.get("learning_path", cag_key_data)
+    if cached_path and isinstance(cached_path, dict) and cached_path.get("learning_tiers"):
+        logger.info("CAG Cache HIT: Reusing cached learning path for '%s' (0 LLM cost)", project_name)
+        cached_copy = dict(cached_path)
+        cached_copy["cag_cached"] = True
+        return cached_copy
+
     prompt = f"""
 You are a Professional Technical Tutor creating a customized summary learning path for an employee joining a project.
 
@@ -138,6 +152,7 @@ Do NOT include markdown formatting or commentary outside the JSON object.
                     parsed = json.loads(clean_raw)
                     if isinstance(parsed, dict) and "learning_tiers" in parsed:
                         parsed["api_available"] = True
+                        cag.set("learning_path", cag_key_data, parsed, ttl_seconds=86400)
                         return parsed
             except Exception as exc:
                 err_str = str(exc)
@@ -170,6 +185,7 @@ Do NOT include markdown formatting or commentary outside the JSON object.
                     parsed = json.loads(clean_raw)
                     if isinstance(parsed, dict) and "learning_tiers" in parsed:
                         parsed["api_available"] = True
+                        cag.set("learning_path", cag_key_data, parsed, ttl_seconds=86400)
                         return parsed
             else:
                 last_status_code = res.status_code
